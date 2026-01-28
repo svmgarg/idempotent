@@ -104,20 +104,21 @@ curl -X POST http://localhost:8080/idempotency/check \
 ## Project Structure
 
 ```
-src/main/java/com/idempotent/
-├── IdempotencyServiceApplication.java  # Main application
-├── controller/
-│   └── IdempotencyController.java      # REST endpoint
-├── dto/
-│   ├── IdempotencyRequest.java         # Request DTO
-│   └── IdempotencyResponse.java        # Response DTO
-├── exception/
-│   └── GlobalExceptionHandler.java     # Error handling
-├── model/
-│   └── IdempotencyRecord.java          # Domain model
-└── service/
-    ├── IdempotencyService.java         # Service interface
-    ├── InMemoryIdempotencyService.java # In-memory implementation
-    └── RedisIdempotencyService.java    # Redis implementation
+idempotent-service/
+├── pom.xml
+└── src/main/java/com/idempotent/
+    ├── IdempotencyServiceApplication.java  # Main application
+    ├── controller/
+    │   └── IdempotencyController.java      # REST endpoint
+    ├── dto/
+    │   ├── IdempotencyRequest.java         # Request DTO
+    │   └── IdempotencyResponse.java        # Response DTO
+    ├── exception/
+    │   └── GlobalExceptionHandler.java     # Error handling
+    ├── model/
+    │   └── IdempotencyRecord.java          # Domain model
+    └── service/
+        ├── IdempotencyService.java         # Service interface
+        ├── InMemoryIdempotencyService.java # In-memory implementation
+        └── RedisIdempotencyService.java    # Redis implementation
 ```
-Idempotent Service

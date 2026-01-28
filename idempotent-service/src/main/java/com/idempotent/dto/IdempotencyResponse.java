@@ -16,7 +16,9 @@ import java.time.Instant;
 public class IdempotencyResponse {
 
     private String idempotencyKey;
+    @com.fasterxml.jackson.annotation.JsonProperty("isNew")
     private boolean isNew;
+    @com.fasterxml.jackson.annotation.JsonProperty("isDuplicate")
     private boolean isDuplicate;
     private Instant createdAt;
     private Instant expiresAt;
