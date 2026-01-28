@@ -32,8 +32,8 @@ Atomically checks if an idempotency key exists and inserts it if not.
   "idempotencyKey": "unique-key-123",
   "isNew": true,
   "isDuplicate": false,
-  "createdAt": "2026-01-28T10:30:00Z",
-  "expiresAt": "2026-01-28T11:30:00Z",
+  "createdAt": "2024-01-28T10:30:00Z",
+  "expiresAt": "2024-01-28T11:30:00Z",
   "message": "Key accepted - first occurrence",
   "processingTimeNanos": 45000
 }
@@ -45,8 +45,8 @@ Atomically checks if an idempotency key exists and inserts it if not.
   "idempotencyKey": "unique-key-123",
   "isNew": false,
   "isDuplicate": true,
-  "createdAt": "2026-01-28T10:30:00Z",
-  "expiresAt": "2026-01-28T11:30:00Z",
+  "createdAt": "2024-01-28T10:30:00Z",
+  "expiresAt": "2024-01-28T11:30:00Z",
   "message": "Duplicate request detected",
   "processingTimeNanos": 32000
 }
@@ -65,12 +65,16 @@ Atomically checks if an idempotency key exists and inserts it if not.
 
 ### Run (In-Memory Storage - Default)
 ```bash
-./mvnw spring-boot:run
+./mvnw spring-boot:run -pl idempotent-service
+# or
+cd idempotent-service && ../mvnw spring-boot:run
 ```
 
 ### Run (Redis Storage)
 ```bash
-IDEMPOTENCY_STORAGE=redis REDIS_HOST=localhost ./mvnw spring-boot:run
+IDEMPOTENCY_STORAGE=redis REDIS_HOST=localhost ./mvnw spring-boot:run -pl idempotent-service
+# or
+cd idempotent-service && IDEMPOTENCY_STORAGE=redis REDIS_HOST=localhost ../mvnw spring-boot:run
 ```
 
 ### Test
