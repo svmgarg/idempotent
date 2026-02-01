@@ -1,7 +1,9 @@
 com/idempotent/controller/IdempotencyController.class
 com/idempotent/service/InMemoryIdempotencyService.class
 com/idempotent/dto/IdempotencyRequest$IdempotencyRequestBuilder.class
+com/idempotent/service/JsonFileApiKeyProvider.class
 com/idempotent/dto/IdempotencyRequest.class
+com/idempotent/service/ApiKeyProvider.class
 com/idempotent/dto/IdempotencyResponse$IdempotencyResponseBuilder.class
 com/idempotent/service/RedisIdempotencyService.class
 com/idempotent/model/IdempotencyRecord$IdempotencyRecordBuilder.class
