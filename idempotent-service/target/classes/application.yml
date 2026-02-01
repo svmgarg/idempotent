@@ -1,0 +1,50 @@
+server:
+  port: 8080
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 20
+    accept-count: 100
+    max-connections: 10000
+
+spring:
+  application:
+    name: idempotency-service
+
+  # Redis configuration (only used when idempotency.storage=redis)
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 50
+          max-idle: 20
+          min-idle: 5
+          max-wait: 1000ms
+
+# Idempotency service configuration
+idempotency:
+  # Storage type: "memory" (default) or "redis"
+  storage: ${IDEMPOTENCY_STORAGE:memory}
+  # Default TTL for idempotency keys in seconds
+  default-ttl-seconds: 3600
+
+# Actuator endpoints for monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+# Logging
+logging:
+  level:
+    com.idempotent: INFO
+    org.springframework.web: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
