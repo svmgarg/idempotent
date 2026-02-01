@@ -3,6 +3,7 @@ package com.idempotent.controller;
 import com.idempotent.dto.IdempotencyRequest;
 import com.idempotent.dto.IdempotencyResponse;
 import com.idempotent.service.IdempotencyService;
+import com.idempotent.service.ApiKeyProvider;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class IdempotencyController {
 
     private final IdempotencyService idempotencyService;
+    private final ApiKeyProvider apiKeyProvider;
 
     /**
      * Atomically checks and inserts an idempotency key.
@@ -30,9 +32,14 @@ public class IdempotencyController {
      */
     @PostMapping("/check")
     public ResponseEntity<IdempotencyResponse> checkIdempotency(
-            @Valid @RequestBody IdempotencyRequest request) {
+            @Valid @RequestBody IdempotencyRequest request,
+            @RequestHeader(value = "api-key", required = false) String apiKeyHeader) {
 
         log.debug("Checking idempotency for key: {}", request.getIdempotencyKey());
+
+        if (!apiKeyProvider.isValid(apiKeyHeader)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
         IdempotencyResponse response = idempotencyService.checkAndInsert(request);
 
@@ -51,5 +58,13 @@ public class IdempotencyController {
     @GetMapping("/health")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("OK");
+    }
+
+    /**
+     * Ping endpoint.
+     */
+    @GetMapping("/ping")
+    public ResponseEntity<String> ping() {
+        return ResponseEntity.ok("pong");
     }
 }
