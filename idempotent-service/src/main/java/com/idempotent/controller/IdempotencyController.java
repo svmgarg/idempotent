@@ -1,5 +1,6 @@
 package com.idempotent.controller;
 
+import com.idempotent.dto.HealthResponse;
 import com.idempotent.dto.IdempotencyRequest;
 import com.idempotent.dto.IdempotencyResponse;
 import com.idempotent.service.IdempotencyService;
@@ -9,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.Instant;
 
 @Slf4j
 @RestController
@@ -47,9 +50,15 @@ public class IdempotencyController {
 
     /**
      * Health check endpoint.
+     * Returns service health status and basic metrics.
      */
     @GetMapping("/health")
-    public ResponseEntity<String> health() {
-        return ResponseEntity.ok("OK");
+    public ResponseEntity<HealthResponse> health() {
+        return ResponseEntity.ok(HealthResponse.builder()
+                .status("UP")
+                .service("idempotency-service")
+                .timestamp(Instant.now())
+                .message("Service is healthy and operational")
+                .build());
     }
 }

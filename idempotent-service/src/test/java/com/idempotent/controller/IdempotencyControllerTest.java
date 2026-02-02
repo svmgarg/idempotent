@@ -111,10 +111,24 @@ class IdempotencyControllerTest {
     }
 
     @Test
-    @DisplayName("GET /idempotency/health - should return 200 OK")
+    @DisplayName("GET /idempotency/health - should return 200 OK with health details")
     void shouldReturnHealthOk() throws Exception {
         mockMvc.perform(get("/idempotency/health"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("OK"));
+                .andExpect(jsonPath("$.status").value("UP"))
+                .andExpect(jsonPath("$.service").value("idempotency-service"))
+                .andExpect(jsonPath("$.message").value("Service is healthy and operational"))
+                .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    @Test
+    @DisplayName("GET /idempotency/health - health response contains required fields")
+    void shouldReturnCompleteHealthResponse() throws Exception {
+        mockMvc.perform(get("/idempotency/health"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").isNotEmpty())
+                .andExpect(jsonPath("$.service").isNotEmpty())
+                .andExpect(jsonPath("$.timestamp").isNotEmpty())
+                .andExpect(jsonPath("$.message").isNotEmpty());
     }
 }
