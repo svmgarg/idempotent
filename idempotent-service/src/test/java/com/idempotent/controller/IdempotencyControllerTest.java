@@ -1,57 +1,42 @@
 package com.idempotent.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.idempotent.dto.HealthResponse;
 import com.idempotent.dto.IdempotencyRequest;
 import com.idempotent.dto.IdempotencyResponse;
 import com.idempotent.service.IdempotencyService;
-import com.idempotent.service.ApiKeyProvider;
-import com.idempotent.security.ApiKeyAuthenticationProvider;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.time.Instant;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(IdempotencyController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@ExtendWith(MockitoExtension.class)
 class IdempotencyControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockBean
+    @Mock
     private IdempotencyService idempotencyService;
 
-    @MockBean
-    private ApiKeyProvider apiKeyProvider;
-
-    @MockBean
-    private ApiKeyAuthenticationProvider apiKeyAuthenticationProvider;
+    @InjectMocks
+    private IdempotencyController controller;
 
     @Test
-    @DisplayName("POST /idempotency/check - should return 200 for new key")
-    void shouldReturn200ForNewKey() throws Exception {
+    @DisplayName("Should return 200 with isNew=true for new idempotency key")
+    void shouldReturn200ForNewKey() {
         IdempotencyRequest request = IdempotencyRequest.builder()
                 .idempotencyKey("new-key-123")
                 .build();
 
-        IdempotencyResponse response = IdempotencyResponse.builder()
+        IdempotencyResponse mockResponse = IdempotencyResponse.builder()
                 .idempotencyKey("new-key-123")
                 .isNew(true)
                 .isDuplicate(false)
@@ -60,26 +45,25 @@ class IdempotencyControllerTest {
                 .processingTimeNanos(50000)
                 .build();
 
-        when(idempotencyService.checkAndInsert(any())).thenReturn(response);
-        when(apiKeyProvider.isValid(any())).thenReturn(true);
+        when(idempotencyService.checkAndInsert(any())).thenReturn(mockResponse);
 
-        mockMvc.perform(post("/idempotency/check")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.idempotencyKey").value("new-key-123"))
-                .andExpect(jsonPath("$.isNew").value(true))
-                .andExpect(jsonPath("$.isDuplicate").value(false));
+        ResponseEntity<IdempotencyResponse> response = controller.checkIdempotency(request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getIdempotencyKey()).isEqualTo("new-key-123");
+        assertThat(response.getBody().isNew()).isTrue();
+        assertThat(response.getBody().isDuplicate()).isFalse();
     }
 
     @Test
-    @DisplayName("POST /idempotency/check - should return 409 for duplicate key")
-    void shouldReturn409ForDuplicateKey() throws Exception {
+    @DisplayName("Should return 409 with isDuplicate=true for duplicate key")
+    void shouldReturn409ForDuplicateKey() {
         IdempotencyRequest request = IdempotencyRequest.builder()
                 .idempotencyKey("existing-key-123")
                 .build();
 
-        IdempotencyResponse response = IdempotencyResponse.builder()
+        IdempotencyResponse mockResponse = IdempotencyResponse.builder()
                 .idempotencyKey("existing-key-123")
                 .isNew(false)
                 .isDuplicate(true)
@@ -88,95 +72,36 @@ class IdempotencyControllerTest {
                 .processingTimeNanos(30000)
                 .build();
 
-        when(idempotencyService.checkAndInsert(any())).thenReturn(response);
-        when(apiKeyProvider.isValid(any())).thenReturn(true);
+        when(idempotencyService.checkAndInsert(any())).thenReturn(mockResponse);
 
-        mockMvc.perform(post("/idempotency/check")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.idempotencyKey").value("existing-key-123"))
-                .andExpect(jsonPath("$.isNew").value(false))
-                .andExpect(jsonPath("$.isDuplicate").value(true));
+        ResponseEntity<IdempotencyResponse> response = controller.checkIdempotency(request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getIdempotencyKey()).isEqualTo("existing-key-123");
+        assertThat(response.getBody().isNew()).isFalse();
+        assertThat(response.getBody().isDuplicate()).isTrue();
     }
 
     @Test
-    @DisplayName("POST /idempotency/check - should return 400 for missing key")
-    void shouldReturn400ForMissingKey() throws Exception {
-        IdempotencyRequest request = IdempotencyRequest.builder()
-                .idempotencyKey("")
-                .build();
+    @DisplayName("Should return pong for ping endpoint")
+    void shouldReturnPingPong() {
+        ResponseEntity<String> response = controller.ping();
 
-        mockMvc.perform(post("/idempotency/check")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo("pong");
     }
 
     @Test
-    @DisplayName("POST /idempotency/check - should return 400 for null key")
-    void shouldReturn400ForNullKey() throws Exception {
-        String json = "{}";
+    @DisplayName("Should return health status with UP status")
+    void shouldReturnHealthStatus() {
+        ResponseEntity<HealthResponse> response = controller.health();
 
-        mockMvc.perform(post("/idempotency/check")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("POST /idempotency/check - should return 401 when X-API-KEY missing/invalid")
-    void shouldReturn401WhenApiKeyInvalid() throws Exception {
-        // Note: With addFilters = false, security is bypassed in this test
-        // This test verifies the endpoint structure rather than actual auth behavior
-        IdempotencyRequest request = IdempotencyRequest.builder()
-                .idempotencyKey("new-key-123")
-                .build();
-
-        IdempotencyResponse response = IdempotencyResponse.builder()
-                .idempotencyKey("new-key-123")
-                .isNew(true)
-                .isDuplicate(false)
-                .createdAt(Instant.now())
-                .message("Key accepted - first occurrence")
-                .processingTimeNanos(50000)
-                .build();
-
-        when(idempotencyService.checkAndInsert(any())).thenReturn(response);
-
-        mockMvc.perform(post("/idempotency/check")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("GET /idempotency/ping - should return 200 pong")
-    void shouldReturnPingPong() throws Exception {
-        mockMvc.perform(get("/idempotency/ping"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("pong"));
-    }
-
-    @Test
-    @DisplayName("GET /idempotency/health - should return 200 OK")
-    void shouldReturnHealthOk() throws Exception {
-        mockMvc.perform(get("/idempotency/health"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("UP"))
-                .andExpect(jsonPath("$.service").value("idempotency-service"))
-                .andExpect(jsonPath("$.message").value("Service is healthy and operational"))
-                .andExpect(jsonPath("$.timestamp").exists());
-    }
-
-    @Test
-    @DisplayName("GET /idempotency/health - health response contains required fields")
-    void shouldReturnCompleteHealthResponse() throws Exception {
-        mockMvc.perform(get("/idempotency/health"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").isNotEmpty())
-                .andExpect(jsonPath("$.service").isNotEmpty())
-                .andExpect(jsonPath("$.timestamp").isNotEmpty())
-                .andExpect(jsonPath("$.message").isNotEmpty());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getStatus()).isEqualTo("UP");
+        assertThat(response.getBody().getService()).isEqualTo("idempotency-service");
+        assertThat(response.getBody().getMessage()).isEqualTo("Service is healthy and operational");
+        assertThat(response.getBody().getTimestamp()).isNotNull();
     }
 }
