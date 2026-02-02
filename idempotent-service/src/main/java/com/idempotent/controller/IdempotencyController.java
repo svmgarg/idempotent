@@ -27,8 +27,11 @@ public class IdempotencyController {
      *
      * Returns:
      * - 200 OK with isNew=true if the key was newly inserted (proceed with operation)
-     * - 409 Conflict with isDuplicate=true if the key already exists (skip operation)
+     * - 200 OK with isDuplicate=true if the key already exists (skip operation)
      * - 401 Unauthorized if API key is invalid or missing
+     *
+     * Note: Always returns 200 OK for successful checks (even duplicates) to support
+     * integrations like Zapier that treat non-2xx status codes as errors.
      *
      * @param request the idempotency check request containing the key
      * @return the idempotency response
@@ -41,11 +44,7 @@ public class IdempotencyController {
 
         IdempotencyResponse response = idempotencyService.checkAndInsert(request);
 
-        // Return 409 Conflict for duplicates, 200 OK for new keys
-        if (response.isDuplicate()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
-        }
-
+        // Always return 200 OK for Zapier integration compatibility
         return ResponseEntity.ok(response);
     }
 

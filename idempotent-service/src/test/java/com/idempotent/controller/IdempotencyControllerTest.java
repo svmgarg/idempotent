@@ -57,8 +57,8 @@ class IdempotencyControllerTest {
     }
 
     @Test
-    @DisplayName("Should return 409 with isDuplicate=true for duplicate key")
-    void shouldReturn409ForDuplicateKey() {
+    @DisplayName("Should return 200 with isDuplicate=true for duplicate key")
+    void shouldReturn200ForDuplicateKey() {
         IdempotencyRequest request = IdempotencyRequest.builder()
                 .idempotencyKey("existing-key-123")
                 .build();
@@ -76,7 +76,7 @@ class IdempotencyControllerTest {
 
         ResponseEntity<IdempotencyResponse> response = controller.checkIdempotency(request);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getIdempotencyKey()).isEqualTo("existing-key-123");
         assertThat(response.getBody().isNew()).isFalse();

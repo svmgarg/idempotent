@@ -109,7 +109,7 @@ class IdempotencyControllerEdgeCaseTest {
 
         ResponseEntity<IdempotencyResponse> response = controller.checkIdempotency(request);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().isDuplicate()).isTrue();
     }
@@ -211,8 +211,8 @@ class IdempotencyControllerEdgeCaseTest {
         ResponseEntity<IdempotencyResponse> response3 = controller.checkIdempotency(request);
 
         assertThat(response1.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
-        assertThat(response3.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response3.getStatusCode()).isEqualTo(HttpStatus.OK);
         verify(idempotencyService, times(3)).checkAndInsert(request);
     }
 }
