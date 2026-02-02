@@ -1,9 +1,0 @@
-com/idempotent/exception/GlobalExceptionHandlerTest.class
-com/idempotent/service/InMemoryIdempotencyServiceTest.class
-com/idempotent/security/ApiKeyAuthenticationProviderEdgeCaseTest.class
-com/idempotent/controller/IdempotencyControllerTest.class
-com/idempotent/security/ApiKeyAuthenticationTest.class
-com/idempotent/service/RedisIdempotencyServiceTest.class
-com/idempotent/dto/IdempotencyRequestValidationTest.class
-com/idempotent/service/InMemoryIdempotencyServiceEdgeCaseTest.class
-com/idempotent/controller/IdempotencyControllerEdgeCaseTest.class
