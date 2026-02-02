@@ -102,7 +102,8 @@ public class RedisIdempotencyService implements IdempotencyService {
             }
         } catch (Exception e) {
             log.error("Error checking idempotency key in Redis: {}", key, e);
-            throw new RuntimeException("Failed to check idempotency key", e);
+            // Provide detailed error context
+            throw new RuntimeException("Failed to check idempotency key in Redis: " + e.getMessage(), e);
         }
     }
 
