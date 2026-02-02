@@ -1,0 +1,4 @@
+/workspaces/idempotent/idempotent-service/src/test/java/com/idempotent/service/RedisIdempotencyServiceTest.java
+/workspaces/idempotent/idempotent-service/src/test/java/com/idempotent/service/InMemoryIdempotencyServiceTest.java
+/workspaces/idempotent/idempotent-service/src/test/java/com/idempotent/exception/GlobalExceptionHandlerTest.java
+/workspaces/idempotent/idempotent-service/src/test/java/com/idempotent/controller/IdempotencyControllerTest.java

@@ -1,0 +1,4 @@
+com/idempotent/controller/IdempotencyControllerTest.class
+com/idempotent/service/RedisIdempotencyServiceTest.class
+com/idempotent/exception/GlobalExceptionHandlerTest.class
+com/idempotent/service/InMemoryIdempotencyServiceTest.class
