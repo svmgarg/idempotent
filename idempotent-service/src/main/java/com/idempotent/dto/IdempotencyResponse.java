@@ -17,10 +17,8 @@ import java.time.Instant;
 public class IdempotencyResponse {
 
     private String idempotencyKey;
-    
     @JsonProperty("isNew")
     private boolean isNew;
-    
     @JsonProperty("isDuplicate")
     private boolean isDuplicate;
     private Instant createdAt;

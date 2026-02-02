@@ -23,7 +23,7 @@ public class IdempotencyController {
 
     /**
      * Atomically checks and inserts an idempotency key.
-     * Requires API Key authentication via header: api-key
+     * Requires API Key authentication via header: X-API-KEY
      *
      * Returns:
      * - 200 OK with isNew=true if the key was newly inserted (proceed with operation)

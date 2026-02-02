@@ -79,7 +79,7 @@ public class StartupValidator implements CommandLineRunner {
             // Create headers with correct content type and API key
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("api-key", API_KEY);
+            headers.set("X-API-KEY", API_KEY);
             HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
             
             ResponseEntity<String> response = restTemplate.postForEntity(
