@@ -5,6 +5,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import com.idempotent.dto.HealthResponse;
 import com.idempotent.dto.IdempotencyResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -71,9 +74,15 @@ public class StartupValidator implements CommandLineRunner {
             log.info("   a) Testing with new key: {}", testKey);
             
             String requestBody = "{\"idempotencyKey\": \"" + testKey + "\"}";
+            
+            // Create headers with correct content type
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+            
             ResponseEntity<String> response = restTemplate.postForEntity(
                 CHECK_ENDPOINT, 
-                requestBody, 
+                entity,
                 String.class
             );
             
@@ -83,9 +92,10 @@ public class StartupValidator implements CommandLineRunner {
 
             // Test with duplicate key
             log.info("   b) Testing with duplicate key: {}", testKey);
+            HttpEntity<String> duplicateEntity = new HttpEntity<>(requestBody, headers);
             ResponseEntity<String> duplicateResponse = restTemplate.postForEntity(
                 CHECK_ENDPOINT, 
-                requestBody, 
+                duplicateEntity,
                 String.class
             );
             
