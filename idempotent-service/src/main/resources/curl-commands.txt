@@ -5,13 +5,13 @@ curl -X GET http://localhost:8080/idempotency/health
 
 # 2. Check Idempotency - New Key
 curl -X POST http://localhost:8080/idempotency/check \
-  -H "api-key: change-me" \
+  -H "api-key: oUNtfxXl" \
   -H "Content-Type: application/json" \
   -d '{"idempotencyKey": "unique-request-id-123"}'
 
 # 3. Check Idempotency - Duplicate Key (run this twice to see duplicate response)
 curl -X POST http://localhost:8080/idempotency/check \
-  -H "api-key: change-me" \
+  -H "api-key: oUNtfxXl" \
   -H "Content-Type: application/json" \
   -d '{"idempotencyKey": "duplicate-test-key"}'
 
@@ -19,6 +19,6 @@ curl -X POST http://localhost:8080/idempotency/check \
 curl -s -X GET http://localhost:8080/idempotency/health | jq .
 
 curl -s -X POST http://localhost:8080/idempotency/check \
-  -H "api-key: change-me" \
+  -H "api-key: oUNtfxXl" \
   -H "Content-Type: application/json" \
   -d '{"idempotencyKey": "test-'$(date +%s)'"}' | jq .

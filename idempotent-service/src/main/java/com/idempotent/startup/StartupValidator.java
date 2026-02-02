@@ -26,7 +26,7 @@ public class StartupValidator implements CommandLineRunner {
     private static final String BASE_URL = "http://localhost:8080";
     private static final String HEALTH_ENDPOINT = BASE_URL + "/idempotency/health";
     private static final String CHECK_ENDPOINT = BASE_URL + "/idempotency/check";
-    private static final String API_KEY = "change-me";
+    private static final String API_KEY = "oUNtfxXl";
 
     public StartupValidator() {
         this.restTemplate = new RestTemplate();
