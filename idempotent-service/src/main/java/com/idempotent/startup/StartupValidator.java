@@ -26,6 +26,7 @@ public class StartupValidator implements CommandLineRunner {
     private static final String BASE_URL = "http://localhost:8080";
     private static final String HEALTH_ENDPOINT = BASE_URL + "/idempotency/health";
     private static final String CHECK_ENDPOINT = BASE_URL + "/idempotency/check";
+    private static final String API_KEY = "oUNtfxXl";
 
     public StartupValidator() {
         this.restTemplate = new RestTemplate();
@@ -75,9 +76,10 @@ public class StartupValidator implements CommandLineRunner {
             
             String requestBody = "{\"idempotencyKey\": \"" + testKey + "\"}";
             
-            // Create headers with correct content type
+            // Create headers with correct content type and API key
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("api-key", API_KEY);
             HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
             
             ResponseEntity<String> response = restTemplate.postForEntity(
