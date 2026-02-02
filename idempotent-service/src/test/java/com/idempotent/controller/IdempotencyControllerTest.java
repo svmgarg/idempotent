@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.idempotent.dto.IdempotencyRequest;
 import com.idempotent.dto.IdempotencyResponse;
 import com.idempotent.service.IdempotencyService;
+import com.idempotent.service.ApiKeyProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,9 @@ class IdempotencyControllerTest {
     @MockBean
     private IdempotencyService idempotencyService;
 
+    @MockBean
+    private ApiKeyProvider apiKeyProvider;
+
     @Test
     @DisplayName("POST /idempotency/check - should return 200 for new key")
     void shouldReturn200ForNewKey() throws Exception {
@@ -49,6 +53,7 @@ class IdempotencyControllerTest {
                 .build();
 
         when(idempotencyService.checkAndInsert(any())).thenReturn(response);
+        when(apiKeyProvider.isValid(any())).thenReturn(true);
 
         mockMvc.perform(post("/idempotency/check")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -76,6 +81,7 @@ class IdempotencyControllerTest {
                 .build();
 
         when(idempotencyService.checkAndInsert(any())).thenReturn(response);
+        when(apiKeyProvider.isValid(any())).thenReturn(true);
 
         mockMvc.perform(post("/idempotency/check")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -111,7 +117,30 @@ class IdempotencyControllerTest {
     }
 
     @Test
-    @DisplayName("GET /idempotency/health - should return 200 OK with health details")
+    @DisplayName("POST /idempotency/check - should return 401 when api-key missing/invalid")
+    void shouldReturn401WhenApiKeyInvalid() throws Exception {
+        IdempotencyRequest request = IdempotencyRequest.builder()
+                .idempotencyKey("new-key-123")
+                .build();
+
+        when(apiKeyProvider.isValid(any())).thenReturn(false);
+
+        mockMvc.perform(post("/idempotency/check")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("GET /idempotency/ping - should return 200 pong")
+    void shouldReturnPingPong() throws Exception {
+        mockMvc.perform(get("/idempotency/ping"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("pong"));
+    }
+
+    @Test
+    @DisplayName("GET /idempotency/health - should return 200 OK")
     void shouldReturnHealthOk() throws Exception {
         mockMvc.perform(get("/idempotency/health"))
                 .andExpect(status().isOk())
