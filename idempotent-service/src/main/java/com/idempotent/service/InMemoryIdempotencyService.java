@@ -39,20 +39,24 @@ public class InMemoryIdempotencyService implements IdempotencyService {
         Instant now = Instant.now();
         Instant expiresAt = now.plusSeconds(ttlSeconds);
 
-        IdempotencyRecord newRecord = IdempotencyRecord.builder()
-                .idempotencyKey(request.getIdempotencyKey())
-                .clientId(request.getClientId())
-                .createdAt(now)
-                .expiresAt(expiresAt)
-                .build();
+        // Track if we created a new record (lambda only called if key is absent)
+        var createdFlag = new java.util.concurrent.atomic.AtomicBoolean(false);
 
-        // Atomic check-and-insert using putIfAbsent
-        IdempotencyRecord existingRecord = store.putIfAbsent(key, newRecord);
+        // Atomic check-and-create: function only executes if key doesn't exist
+        IdempotencyRecord insertedRecord = store.computeIfAbsent(key, k -> {
+            createdFlag.set(true);
+            return IdempotencyRecord.builder()
+                    .idempotencyKey(request.getIdempotencyKey())
+                    .clientId(request.getClientId())
+                    .createdAt(now)
+                    .expiresAt(expiresAt)
+                    .build();
+        });
 
         long processingTimeNanos = System.nanoTime() - startNanos;
 
-        if (existingRecord == null) {
-            // Key was newly inserted
+        if (createdFlag.get()) {
+            // Only one thread successfully creates the record
             log.debug("New idempotency key inserted: {}", key);
             return IdempotencyResponse.builder()
                     .idempotencyKey(request.getIdempotencyKey())
@@ -62,9 +66,17 @@ public class InMemoryIdempotencyService implements IdempotencyService {
                     .processingTimeNanos(processingTimeNanos)
                     .build();
         } else {
+            IdempotencyRecord existingRecord = insertedRecord;
             // Check if the existing record has expired
             if (existingRecord.getExpiresAt().isBefore(now)) {
                 // Expired record, try to replace it atomically
+                IdempotencyRecord newRecord = IdempotencyRecord.builder()
+                        .idempotencyKey(request.getIdempotencyKey())
+                        .clientId(request.getClientId())
+                        .createdAt(now)
+                        .expiresAt(expiresAt)
+                        .build();
+
                 if (store.replace(key, existingRecord, newRecord)) {
                     log.debug("Expired idempotency key replaced: {}", key);
                     return IdempotencyResponse.builder()
