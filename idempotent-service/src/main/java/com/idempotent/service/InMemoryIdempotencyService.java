@@ -39,25 +39,26 @@ public class InMemoryIdempotencyService implements IdempotencyService {
         Instant now = Instant.now();
         Instant expiresAt = now.plusSeconds(ttlSeconds);
 
-        // Track if we created a new record (lambda only called if key is absent)
-        var createdFlag = new java.util.concurrent.atomic.AtomicBoolean(false);
+        var newKeyInsertedFlag = new java.util.concurrent.atomic.AtomicBoolean(false);
 
-        // Atomic check-and-create: function only executes if key doesn't exist
-        IdempotencyRecord insertedRecord = store.computeIfAbsent(key, k -> {
-            createdFlag.set(true);
-            return IdempotencyRecord.builder()
-                    .idempotencyKey(request.getIdempotencyKey())
-                    .clientId(request.getClientId())
-                    .createdAt(now)
-                    .expiresAt(expiresAt)
-                    .build();
+        IdempotencyRecord resultRecord = store.compute(key, (k, existing) -> {
+            if (existing == null || existing.getExpiresAt().isBefore(now)) {
+                newKeyInsertedFlag.set(true);
+                return IdempotencyRecord.builder()
+                        .idempotencyKey(request.getIdempotencyKey())
+                        .clientId(request.getClientId())
+                        .createdAt(now)
+                        .expiresAt(expiresAt)
+                        .build();
+            }
+            return existing;
         });
 
         long processingTimeNanos = System.nanoTime() - startNanos;
 
-        if (createdFlag.get()) {
-            // Only one thread successfully creates the record
-            log.debug("New idempotency key inserted: {}", key);
+        if (newKeyInsertedFlag.get()) {
+            // New record inserted or expired record replaced
+            log.info("New idempotency key inserted: {}", key);
             return IdempotencyResponse.builder()
                     .idempotencyKey(request.getIdempotencyKey())
                     .isDuplicate(false)
@@ -65,41 +66,17 @@ public class InMemoryIdempotencyService implements IdempotencyService {
                     .expiresAt(expiresAt)
                     .processingTimeNanos(processingTimeNanos)
                     .build();
-        } else {
-            IdempotencyRecord existingRecord = insertedRecord;
-            // Check if the existing record has expired
-            if (existingRecord.getExpiresAt().isBefore(now)) {
-                // Expired record, try to replace it atomically
-                IdempotencyRecord newRecord = IdempotencyRecord.builder()
-                        .idempotencyKey(request.getIdempotencyKey())
-                        .clientId(request.getClientId())
-                        .createdAt(now)
-                        .expiresAt(expiresAt)
-                        .build();
-
-                if (store.replace(key, existingRecord, newRecord)) {
-                    log.debug("Expired idempotency key replaced: {}", key);
-                    return IdempotencyResponse.builder()
-                            .idempotencyKey(request.getIdempotencyKey())
-                            .isDuplicate(false)
-                            .createdAt(now)
-                            .expiresAt(expiresAt)
-                            .processingTimeNanos(System.nanoTime() - startNanos)
-                            .build();
-                }
-                // If replace failed, another thread beat us - treat as duplicate
-            }
-
-            // Key already exists (duplicate request)
-            log.debug("Duplicate idempotency key detected: {}", key);
-            return IdempotencyResponse.builder()
-                    .idempotencyKey(request.getIdempotencyKey())
-                    .isDuplicate(true)
-                    .createdAt(existingRecord.getCreatedAt())
-                    .expiresAt(existingRecord.getExpiresAt())
-                    .processingTimeNanos(System.nanoTime() - startNanos)
-                    .build();
         }
+
+        // Key already exists and is still valid (duplicate request)
+        log.info("Duplicate idempotency key detected: {}", key);
+        return IdempotencyResponse.builder()
+                .idempotencyKey(request.getIdempotencyKey())
+                .isDuplicate(true)
+                .createdAt(resultRecord.getCreatedAt())
+                .expiresAt(resultRecord.getExpiresAt())
+                .processingTimeNanos(processingTimeNanos)
+                .build();
     }
 
     private String buildKey(String idempotencyKey, String clientId) {
