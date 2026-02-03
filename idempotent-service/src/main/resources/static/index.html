@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Idempotency Service - API Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            color: #667eea;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .section h3 {
+            color: #764ba2;
+            font-size: 1.4rem;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        .endpoint {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .method {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .method.post {
+            background: #28a745;
+            color: white;
+        }
+
+        .method.get {
+            background: #007bff;
+            color: white;
+        }
+
+        .url {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .auth-badge {
+            background: #ffc107;
+            color: #333;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: auto;
+        }
+
+        .auth-badge.required {
+            background: #dc3545;
+            color: white;
+        }
+
+        .auth-badge.none {
+            background: #28a745;
+            color: white;
+        }
+
+        .description {
+            margin: 15px 0;
+            line-height: 1.8;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .parameter-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .parameter-table th,
+        .parameter-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .parameter-table th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .parameter-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .parameter-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge.required {
+            background: #dc3545;
+            color: white;
+        }
+
+        .badge.optional {
+            background: #6c757d;
+            color: white;
+        }
+
+        .response-code {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .response-code.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .response-code.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        footer {
+            background: #2d2d2d;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .nav-links a {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .endpoint-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .auth-badge {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔒 Idempotency Service</h1>
+            <p>Prevent Duplicate Operations with Atomic Check-and-Insert</p>
+            <div class="nav-links">
+                <a href="#overview">Overview</a>
+                <a href="#authentication">Authentication</a>
+                <a href="#check-api">Check API</a>
+                <a href="#health-api">Health API</a>
+                <a href="#examples">Examples</a>
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- Overview Section -->
+            <section class="section" id="overview">
+                <h2>📖 Overview</h2>
+                <p class="description">
+                    The Idempotency Service provides a reliable mechanism to prevent duplicate operations in distributed systems.
+                    It uses atomic check-and-insert operations with ConcurrentHashMap (in-memory) or Redis (distributed) to ensure
+                    that duplicate requests with the same idempotency key are detected and rejected.
+                </p>
+                
+                <div class="info-box">
+                    <strong>Key Features:</strong>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>✅ Atomic check-and-insert operations</li>
+                        <li>✅ Configurable TTL (Time To Live) for idempotency keys</li>
+                        <li>✅ Automatic cleanup of expired entries</li>
+                        <li>✅ Support for multi-tenant scenarios with client IDs</li>
+                        <li>✅ API Key authentication</li>
+                        <li>✅ In-memory or Redis storage backend</li>
+                    </ul>
+                </div>
+
+                <h3>Base URL</h3>
+                <pre><code>http://localhost:8080/idempotency</code></pre>
+            </section>
+
+            <!-- Authentication Section -->
+            <section class="section" id="authentication">
+                <h2>🔐 Authentication</h2>
+                <p class="description">
+                    The <code>/check</code> endpoint requires API Key authentication. Include the API key in the request header.
+                </p>
+
+                <h3>Header</h3>
+                <table class="parameter-table">
+                    <thead>
+                        <tr>
+                            <th>Header Name</th>
+                            <th>Value</th>
+                            <th>Required</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>X-API-KEY</code></td>
+                            <td>Your API key (configured in apiKey.json)</td>
+                            <td><span class="badge required">Required</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important:</strong> The <code>/health</code> and <code>/ping</code> endpoints do not require authentication.
+                </div>
+            </section>
+
+            <!-- Check API Section -->
+            <section class="section" id="check-api">
+                <h2>🔍 Check API</h2>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method post">POST</span>
+                        <span class="url">/idempotency/check</span>
+                        <span class="auth-badge required">🔐 Auth Required</span>
+                    </div>
+
+                    <div class="description">
+                        <p>
+                            Atomically checks if an idempotency key exists and inserts it if not found or expired.
+                            This endpoint always returns <code>200 OK</code> for successful checks (even for duplicates)
+                            to support integrations like Zapier that treat non-2xx status codes as errors.
+                        </p>
+                    </div>
+
+                    <h3>Request Body</h3>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                                <th>Constraints</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>idempotencyKey</code></td>
+                                <td>string</td>
+                                <td><span class="badge required">Required</span></td>
+                                <td>Unique key to identify the operation</td>
+                                <td>1-256 characters</td>
+                            </tr>
+                            <tr>
+                                <td><code>clientId</code></td>
+                                <td>string</td>
+                                <td><span class="badge optional">Optional</span></td>
+                                <td>Client identifier for multi-tenant scenarios</td>
+                                <td>Max 128 characters</td>
+                            </tr>
+                            <tr>
+                                <td><code>ttlSeconds</code></td>
+                                <td>long</td>
+                                <td><span class="badge optional">Optional</span></td>
+                                <td>Custom TTL in seconds (overrides default)</td>
+                                <td>Positive number</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Request Example</h3>
+                    <pre><code>POST /idempotency/check
+Content-Type: application/json
+X-API-KEY: your-api-key-here
+
+{
+  "idempotencyKey": "payment-123-abc",
+  "clientId": "client-A",
+  "ttlSeconds": 3600
+}</code></pre>
+
+                    <h3>Response Body</h3>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>idempotencyKey</code></td>
+                                <td>string</td>
+                                <td>The idempotency key from the request</td>
+                            </tr>
+                            <tr>
+                                <td><code>isDuplicate</code></td>
+                                <td>boolean</td>
+                                <td><code>false</code> = new key (proceed), <code>true</code> = duplicate (skip)</td>
+                            </tr>
+                            <tr>
+                                <td><code>createdAt</code></td>
+                                <td>timestamp</td>
+                                <td>When the key was first created (ISO 8601 format)</td>
+                            </tr>
+                            <tr>
+                                <td><code>expiresAt</code></td>
+                                <td>timestamp</td>
+                                <td>When the key will expire (ISO 8601 format)</td>
+                            </tr>
+                            <tr>
+                                <td><code>processingTimeNanos</code></td>
+                                <td>long</td>
+                                <td>Processing time in nanoseconds</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Response Examples</h3>
+                    
+                    <div class="success-box">
+                        <strong>✅ New Key (Proceed with Operation)</strong>
+                    </div>
+                    <pre><code>HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "idempotencyKey": "payment-123-abc",
+  "isDuplicate": false,
+  "createdAt": "2026-02-03T16:30:00.123Z",
+  "expiresAt": "2026-02-03T17:30:00.123Z",
+  "processingTimeNanos": 12500
+}</code></pre>
+
+                    <div class="info-box">
+                        <strong>ℹ️ Duplicate Key (Skip Operation)</strong>
+                    </div>
+                    <pre><code>HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "idempotencyKey": "payment-123-abc",
+  "isDuplicate": true,
+  "createdAt": "2026-02-03T16:30:00.123Z",
+  "expiresAt": "2026-02-03T17:30:00.123Z",
+  "processingTimeNanos": 8200
+}</code></pre>
+
+                    <h3>Response Codes</h3>
+                    <div style="margin: 20px 0;">
+                        <p><span class="response-code success">200 OK</span> Check completed successfully (new or duplicate)</p>
+                        <p><span class="response-code error">400 Bad Request</span> Invalid request body or validation error</p>
+                        <p><span class="response-code error">401 Unauthorized</span> Missing or invalid API key</p>
+                        <p><span class="response-code error">500 Internal Server Error</span> Server error occurred</p>
+                    </div>
+
+                    <div class="warning-box">
+                        <strong>⚠️ Important Behavior:</strong>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>Always returns <code>200 OK</code> for successful checks (even duplicates)</li>
+                            <li>Check <code>isDuplicate</code> field to determine if operation should proceed</li>
+                            <li>If <code>isDuplicate</code> is <code>false</code>, proceed with your operation</li>
+                            <li>If <code>isDuplicate</code> is <code>true</code>, skip the operation (already processed)</li>
+                            <li>Expired keys are automatically replaced with new entries</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Health API Section -->
+            <section class="section" id="health-api">
+                <h2>❤️ Health & Monitoring APIs</h2>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="url">/idempotency/health</span>
+                        <span class="auth-badge none">🔓 No Auth</span>
+                    </div>
+
+                    <div class="description">
+                        <p>Health check endpoint that returns the operational status of the service.</p>
+                    </div>
+
+                    <h3>Request Example</h3>
+                    <pre><code>GET /idempotency/health</code></pre>
+
+                    <h3>Response Example</h3>
+                    <pre><code>HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "status": "UP",
+  "service": "idempotency-service",
+  "timestamp": "2026-02-03T16:30:00.123Z",
+  "message": "Service is healthy and operational"
+}</code></pre>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="url">/idempotency/ping</span>
+                        <span class="auth-badge none">🔓 No Auth</span>
+                    </div>
+
+                    <div class="description">
+                        <p>Simple ping endpoint to verify service availability.</p>
+                    </div>
+
+                    <h3>Request Example</h3>
+                    <pre><code>GET /idempotency/ping</code></pre>
+
+                    <h3>Response Example</h3>
+                    <pre><code>HTTP/1.1 200 OK
+Content-Type: text/plain
+
+pong</code></pre>
+                </div>
+            </section>
+
+            <!-- Examples Section -->
+            <section class="section" id="examples">
+                <h2>💡 Usage Examples</h2>
+
+                <h3>cURL Example</h3>
+                <pre><code># Check idempotency (first request - new key)
+curl -X POST http://localhost:8080/idempotency/check \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: your-api-key" \
+  -d '{
+    "idempotencyKey": "payment-order-12345",
+    "clientId": "user-abc",
+    "ttlSeconds": 3600
+  }'
+
+# Response: {"isDuplicate": false, ...} - Proceed with operation
+
+# Check same key again (duplicate)
+curl -X POST http://localhost:8080/idempotency/check \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: your-api-key" \
+  -d '{
+    "idempotencyKey": "payment-order-12345",
+    "clientId": "user-abc"
+  }'
+
+# Response: {"isDuplicate": true, ...} - Skip operation</code></pre>
+
+                <h3>JavaScript/Fetch Example</h3>
+                <pre><code>async function checkIdempotency(key, clientId) {
+  const response = await fetch('http://localhost:8080/idempotency/check', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-KEY': 'your-api-key'
+    },
+    body: JSON.stringify({
+      idempotencyKey: key,
+      clientId: clientId,
+      ttlSeconds: 3600
+    })
+  });
+
+  const result = await response.json();
+  
+  if (result.isDuplicate) {
+    console.log('Duplicate request - skipping operation');
+    return false;
+  } else {
+    console.log('New request - proceeding with operation');
+    return true;
+  }
+}</code></pre>
+
+                <h3>Python Example</h3>
+                <pre><code>import requests
+
+def check_idempotency(key, client_id):
+    response = requests.post(
+        'http://localhost:8080/idempotency/check',
+        headers={
+            'Content-Type': 'application/json',
+            'X-API-KEY': 'your-api-key'
+        },
+        json={
+            'idempotencyKey': key,
+            'clientId': client_id,
+            'ttlSeconds': 3600
+        }
+    )
+    
+    result = response.json()
+    
+    if result['isDuplicate']:
+        print('Duplicate request - skipping operation')
+        return False
+    else:
+        print('New request - proceeding with operation')
+        return True</code></pre>
+
+                <h3>Integration Flow</h3>
+                <div class="info-box">
+                    <strong>Typical Integration Pattern:</strong>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Generate a unique idempotency key for your operation (e.g., UUID, transaction ID)</li>
+                        <li>Call <code>POST /idempotency/check</code> with the key</li>
+                        <li>Check the <code>isDuplicate</code> field in the response:
+                            <ul style="margin-left: 20px;">
+                                <li>If <code>false</code>: This is the first time seeing this key → Proceed with your operation</li>
+                                <li>If <code>true</code>: This key was already processed → Skip the operation and return cached result</li>
+                            </ul>
+                        </li>
+                        <li>The key will automatically expire after the TTL period</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- Configuration Section -->
+            <section class="section" id="configuration">
+                <h2>⚙️ Configuration</h2>
+
+                <h3>Storage Backend</h3>
+                <p class="description">
+                    The service supports two storage backends configured via <code>application.yml</code>:
+                </p>
+
+                <table class="parameter-table">
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>idempotency.storage</code></td>
+                            <td><code>memory</code></td>
+                            <td>In-memory storage using ConcurrentHashMap (default, single-instance)</td>
+                        </tr>
+                        <tr>
+                            <td><code>idempotency.storage</code></td>
+                            <td><code>redis</code></td>
+                            <td>Redis storage for distributed deployments</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Default TTL</h3>
+                <pre><code>idempotency:
+  storage: memory
+  default-ttl-seconds: 3600  # 1 hour default</code></pre>
+            </section>
+        </div>
+
+        <footer>
+            <p>© 2026 Idempotency Service | <a href="https://github.com/svmgarg/idempotent" target="_blank">GitHub Repository</a></p>
+            <p style="margin-top: 10px; opacity: 0.8;">Built with Spring Boot • Version 1.0.0</p>
+        </footer>
+    </div>
+</body>
+</html>

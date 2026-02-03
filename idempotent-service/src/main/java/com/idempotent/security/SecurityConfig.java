@@ -36,6 +36,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/idempotency/ping").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
                 
+                // Static resources (documentation)
+                .requestMatchers("/", "/index.html", "/*.html", "/*.css", "/*.js").permitAll()
+                
                 // Protected endpoints
                 .requestMatchers(HttpMethod.POST, "/idempotency/check").authenticated()
                 
