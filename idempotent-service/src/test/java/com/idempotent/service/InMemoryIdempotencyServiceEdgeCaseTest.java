@@ -5,6 +5,7 @@ import com.idempotent.dto.IdempotencyResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +23,8 @@ class InMemoryIdempotencyServiceEdgeCaseTest {
     @BeforeEach
     void setUp() {
         service = new InMemoryIdempotencyService();
+        // Set the default TTL to 3600 seconds for tests
+        ReflectionTestUtils.setField(service, "defaultTtlSeconds", 3600L);
     }
 
     @Test

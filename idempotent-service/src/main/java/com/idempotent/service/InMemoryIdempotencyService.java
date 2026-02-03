@@ -4,6 +4,7 @@ import com.idempotent.dto.IdempotencyRequest;
 import com.idempotent.dto.IdempotencyResponse;
 import com.idempotent.model.IdempotencyRecord;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,7 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @ConditionalOnProperty(name = "idempotency.storage", havingValue = "memory", matchIfMissing = true)
 public class InMemoryIdempotencyService implements IdempotencyService {
 
-    private static final long DEFAULT_TTL_SECONDS = 3600; // 1 hour default TTL
+    @Value("${idempotency.default-ttl-seconds:3600}")
+    private long defaultTtlSeconds;
 
     private final ConcurrentHashMap<String, IdempotencyRecord> store = new ConcurrentHashMap<>();
 
@@ -32,7 +34,7 @@ public class InMemoryIdempotencyService implements IdempotencyService {
         long startNanos = System.nanoTime();
 
         String key = buildKey(request.getIdempotencyKey(), request.getClientId());
-        long ttlSeconds = request.getTtlSeconds() != null ? request.getTtlSeconds() : DEFAULT_TTL_SECONDS;
+        long ttlSeconds = request.getTtlSeconds() != null ? request.getTtlSeconds() : defaultTtlSeconds;
 
         Instant now = Instant.now();
         Instant expiresAt = now.plusSeconds(ttlSeconds);

@@ -4,6 +4,7 @@ import com.idempotent.dto.IdempotencyRequest;
 import com.idempotent.dto.IdempotencyResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -24,7 +25,9 @@ import java.util.Collections;
 @ConditionalOnProperty(name = "idempotency.storage", havingValue = "redis")
 public class RedisIdempotencyService implements IdempotencyService {
 
-    private static final long DEFAULT_TTL_SECONDS = 3600; // 1 hour default TTL
+    @Value("${idempotency.default-ttl-seconds:3600}")
+    private long defaultTtlSeconds;
+    
     private static final String KEY_PREFIX = "idempotency:";
 
     private final StringRedisTemplate redisTemplate;
@@ -52,7 +55,7 @@ public class RedisIdempotencyService implements IdempotencyService {
         long startNanos = System.nanoTime();
 
         String key = buildKey(request.getIdempotencyKey(), request.getClientId());
-        long ttlSeconds = request.getTtlSeconds() != null ? request.getTtlSeconds() : DEFAULT_TTL_SECONDS;
+        long ttlSeconds = request.getTtlSeconds() != null ? request.getTtlSeconds() : defaultTtlSeconds;
 
         Instant now = Instant.now();
         Instant expiresAt = now.plusSeconds(ttlSeconds);
