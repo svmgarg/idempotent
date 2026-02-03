@@ -30,7 +30,7 @@ class IdempotencyControllerTest {
     private IdempotencyController controller;
 
     @Test
-    @DisplayName("Should return 200 with isNew=true for new idempotency key")
+    @DisplayName("Should return 200 for new idempotency key")
     void shouldReturn200ForNewKey() {
         IdempotencyRequest request = IdempotencyRequest.builder()
                 .idempotencyKey("new-key-123")
@@ -38,10 +38,8 @@ class IdempotencyControllerTest {
 
         IdempotencyResponse mockResponse = IdempotencyResponse.builder()
                 .idempotencyKey("new-key-123")
-                .isNew(true)
                 .isDuplicate(false)
                 .createdAt(Instant.now())
-                .message("Key accepted - first occurrence")
                 .processingTimeNanos(50000)
                 .build();
 
@@ -52,12 +50,11 @@ class IdempotencyControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getIdempotencyKey()).isEqualTo("new-key-123");
-        assertThat(response.getBody().isNew()).isTrue();
         assertThat(response.getBody().isDuplicate()).isFalse();
     }
 
     @Test
-    @DisplayName("Should return 200 with isDuplicate=true for duplicate key")
+    @DisplayName("Should return 200 for duplicate key")
     void shouldReturn200ForDuplicateKey() {
         IdempotencyRequest request = IdempotencyRequest.builder()
                 .idempotencyKey("existing-key-123")
@@ -65,10 +62,8 @@ class IdempotencyControllerTest {
 
         IdempotencyResponse mockResponse = IdempotencyResponse.builder()
                 .idempotencyKey("existing-key-123")
-                .isNew(false)
                 .isDuplicate(true)
                 .createdAt(Instant.now().minusSeconds(60))
-                .message("Duplicate request detected")
                 .processingTimeNanos(30000)
                 .build();
 
@@ -79,7 +74,6 @@ class IdempotencyControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getIdempotencyKey()).isEqualTo("existing-key-123");
-        assertThat(response.getBody().isNew()).isFalse();
         assertThat(response.getBody().isDuplicate()).isTrue();
     }
 

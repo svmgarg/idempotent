@@ -85,8 +85,8 @@ Content-Type: application/json
 ```
 
 **Responses:**
-- `200 OK` with `isNew=true` - First request, proceed with operation
-- `409 Conflict` with `isDuplicate=true` - Duplicate request detected
+- `200 OK` with `isDuplicate=false` - First request, proceed with operation
+- `200 OK` with `isDuplicate=true` - Duplicate request detected
 - `400 Bad Request` - Validation error
 
 ### Health Check

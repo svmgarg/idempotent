@@ -54,11 +54,9 @@ public class InMemoryIdempotencyService implements IdempotencyService {
             log.debug("New idempotency key inserted: {}", key);
             return IdempotencyResponse.builder()
                     .idempotencyKey(request.getIdempotencyKey())
-                    .isNew(true)
                     .isDuplicate(false)
                     .createdAt(now)
                     .expiresAt(expiresAt)
-                    .message("Key accepted - first occurrence")
                     .processingTimeNanos(processingTimeNanos)
                     .build();
         } else {
@@ -69,11 +67,9 @@ public class InMemoryIdempotencyService implements IdempotencyService {
                     log.debug("Expired idempotency key replaced: {}", key);
                     return IdempotencyResponse.builder()
                             .idempotencyKey(request.getIdempotencyKey())
-                            .isNew(true)
                             .isDuplicate(false)
                             .createdAt(now)
                             .expiresAt(expiresAt)
-                            .message("Key accepted - previous occurrence expired")
                             .processingTimeNanos(System.nanoTime() - startNanos)
                             .build();
                 }
@@ -84,11 +80,9 @@ public class InMemoryIdempotencyService implements IdempotencyService {
             log.debug("Duplicate idempotency key detected: {}", key);
             return IdempotencyResponse.builder()
                     .idempotencyKey(request.getIdempotencyKey())
-                    .isNew(false)
                     .isDuplicate(true)
                     .createdAt(existingRecord.getCreatedAt())
                     .expiresAt(existingRecord.getExpiresAt())
-                    .message("Duplicate request detected")
                     .processingTimeNanos(System.nanoTime() - startNanos)
                     .build();
         }

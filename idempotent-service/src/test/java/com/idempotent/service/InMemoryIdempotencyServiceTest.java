@@ -24,7 +24,7 @@ class InMemoryIdempotencyServiceTest {
     }
 
     @Test
-    @DisplayName("Should return isNew=true for new idempotency key")
+    @DisplayName("Should return isDuplicate=false for new idempotency key")
     void shouldReturnNewForFirstRequest() {
         IdempotencyRequest request = IdempotencyRequest.builder()
                 .idempotencyKey(UUID.randomUUID().toString())
@@ -32,7 +32,6 @@ class InMemoryIdempotencyServiceTest {
 
         IdempotencyResponse response = service.checkAndInsert(request);
 
-        assertTrue(response.isNew());
         assertFalse(response.isDuplicate());
         assertNotNull(response.getCreatedAt());
         assertNotNull(response.getExpiresAt());
@@ -48,11 +47,10 @@ class InMemoryIdempotencyServiceTest {
 
         // First request
         IdempotencyResponse first = service.checkAndInsert(request);
-        assertTrue(first.isNew());
+        assertFalse(first.isDuplicate());
 
         // Second request with same key
         IdempotencyResponse second = service.checkAndInsert(request);
-        assertFalse(second.isNew());
         assertTrue(second.isDuplicate());
     }
 
@@ -69,8 +67,8 @@ class InMemoryIdempotencyServiceTest {
         IdempotencyResponse response1 = service.checkAndInsert(request1);
         IdempotencyResponse response2 = service.checkAndInsert(request2);
 
-        assertTrue(response1.isNew());
-        assertTrue(response2.isNew());
+        assertFalse(response1.isDuplicate());
+        assertFalse(response2.isDuplicate());
     }
 
     @Test
@@ -91,8 +89,8 @@ class InMemoryIdempotencyServiceTest {
         IdempotencyResponse response2 = service.checkAndInsert(request2);
 
         // Same key but different clients - both should be new
-        assertTrue(response1.isNew());
-        assertTrue(response2.isNew());
+        assertFalse(response1.isDuplicate());
+        assertFalse(response2.isDuplicate());
     }
 
     @Test
@@ -122,9 +120,9 @@ class InMemoryIdempotencyServiceTest {
         latch.await(10, TimeUnit.SECONDS);
         executor.shutdown();
 
-        // Exactly one should be "new", rest should be "duplicate"
-        long newCount = responses.stream().filter(IdempotencyResponse::isNew).count();
+        // Exactly one should be new (isDuplicate=false), rest should be duplicate (isDuplicate=true)
         long duplicateCount = responses.stream().filter(IdempotencyResponse::isDuplicate).count();
+        long newCount = responses.size() - duplicateCount;
 
         assertEquals(1, newCount, "Exactly one request should be marked as new");
         assertEquals(numThreads - 1, duplicateCount, "All other requests should be duplicates");
@@ -140,7 +138,7 @@ class InMemoryIdempotencyServiceTest {
 
         IdempotencyResponse response = service.checkAndInsert(request);
 
-        assertTrue(response.isNew());
+        assertFalse(response.isDuplicate());
         assertTrue(response.getExpiresAt().isAfter(response.getCreatedAt()));
         // Verify TTL is approximately 60 seconds
         long ttlSeconds = response.getExpiresAt().getEpochSecond() - response.getCreatedAt().getEpochSecond();

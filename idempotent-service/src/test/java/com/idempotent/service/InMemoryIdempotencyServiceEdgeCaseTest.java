@@ -36,12 +36,10 @@ class InMemoryIdempotencyServiceEdgeCaseTest {
 
         // First request - should be new
         IdempotencyResponse firstResponse = service.checkAndInsert(request);
-        assertThat(firstResponse.isNew()).isTrue();
         assertThat(firstResponse.isDuplicate()).isFalse();
 
         // Immediate second request - should be duplicate
         IdempotencyResponse secondResponse = service.checkAndInsert(request);
-        assertThat(secondResponse.isNew()).isFalse();
         assertThat(secondResponse.isDuplicate()).isTrue();
 
         // Wait for expiration
@@ -49,9 +47,7 @@ class InMemoryIdempotencyServiceEdgeCaseTest {
 
         // Third request after expiration - should be new again
         IdempotencyResponse thirdResponse = service.checkAndInsert(request);
-        assertThat(thirdResponse.isNew()).isTrue();
         assertThat(thirdResponse.isDuplicate()).isFalse();
-        assertThat(thirdResponse.getMessage()).contains("expired");
     }
 
     @Test
@@ -64,7 +60,7 @@ class InMemoryIdempotencyServiceEdgeCaseTest {
 
         IdempotencyResponse response = service.checkAndInsert(request);
 
-        assertThat(response.isNew()).isTrue();
+        assertThat(response.isDuplicate()).isFalse();
         assertThat(response.getExpiresAt()).isAfter(Instant.now().plusSeconds(31535000));
     }
 
@@ -78,7 +74,7 @@ class InMemoryIdempotencyServiceEdgeCaseTest {
 
         IdempotencyResponse response = service.checkAndInsert(request);
 
-        assertThat(response.isNew()).isTrue();
+        assertThat(response.isDuplicate()).isFalse();
         assertThat(response.getExpiresAt()).isBefore(Instant.now().plusSeconds(2));
     }
 
@@ -92,7 +88,7 @@ class InMemoryIdempotencyServiceEdgeCaseTest {
 
         IdempotencyResponse response = service.checkAndInsert(request);
 
-        assertThat(response.isNew()).isTrue();
+        assertThat(response.isDuplicate()).isFalse();
         // Default TTL is 1 hour (3600 seconds)
         long ttlSeconds = response.getExpiresAt().getEpochSecond() - response.getCreatedAt().getEpochSecond();
         assertThat(ttlSeconds).isEqualTo(3600L);
@@ -117,7 +113,7 @@ class InMemoryIdempotencyServiceEdgeCaseTest {
         IdempotencyResponse response2 = service.checkAndInsert(request2);
 
         // Both should be treated as same key (no clientId namespace)
-        assertThat(response1.isNew()).isTrue();
+        assertThat(response1.isDuplicate()).isFalse();
         assertThat(response2.isDuplicate()).isTrue();
     }
 
@@ -140,8 +136,8 @@ class InMemoryIdempotencyServiceEdgeCaseTest {
         IdempotencyResponse response2 = service.checkAndInsert(request2);
 
         // Different clients, so both should be new
-        assertThat(response1.isNew()).isTrue();
-        assertThat(response2.isNew()).isTrue();
+        assertThat(response1.isDuplicate()).isFalse();
+        assertThat(response2.isDuplicate()).isFalse();
     }
 
     @Test
@@ -158,7 +154,7 @@ class InMemoryIdempotencyServiceEdgeCaseTest {
         IdempotencyResponse first = service.checkAndInsert(request);
         IdempotencyResponse second = service.checkAndInsert(request);
 
-        assertThat(first.isNew()).isTrue();
+        assertThat(first.isDuplicate()).isFalse();
         assertThat(second.isDuplicate()).isTrue();
     }
 
@@ -223,7 +219,7 @@ class InMemoryIdempotencyServiceEdgeCaseTest {
                     .build();
 
             IdempotencyResponse response = service.checkAndInsert(request);
-            assertThat(response.isNew()).isTrue();
+            assertThat(response.isDuplicate()).isFalse();
         }
     }
 
@@ -238,7 +234,7 @@ class InMemoryIdempotencyServiceEdgeCaseTest {
 
         IdempotencyResponse response = service.checkAndInsert(request);
 
-        assertThat(response.isNew()).isTrue();
+        assertThat(response.isDuplicate()).isFalse();
         assertThat(response.getIdempotencyKey()).isEqualTo(longKey);
     }
 

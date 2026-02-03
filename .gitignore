@@ -1,0 +1,22 @@
+# Maven build artifacts
+idempotent-service/target/
+idempotent-service/target/**
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.zip

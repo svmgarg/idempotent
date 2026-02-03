@@ -7,7 +7,7 @@ public interface IdempotencyService {
 
     /**
      * Atomically checks if an idempotency key exists.
-     * If it doesn't exist, inserts it and returns isNew=true.
+     * If it doesn't exist, inserts it and returns isDuplicate=false.
      * If it exists, returns isDuplicate=true.
      *
      * @param request the idempotency check request

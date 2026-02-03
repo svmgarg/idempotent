@@ -70,11 +70,9 @@ public class RedisIdempotencyService implements IdempotencyService {
                 log.debug("New idempotency key inserted in Redis: {}", key);
                 return IdempotencyResponse.builder()
                         .idempotencyKey(request.getIdempotencyKey())
-                        .isNew(true)
                         .isDuplicate(false)
                         .createdAt(now)
                         .expiresAt(expiresAt)
-                        .message("Key accepted - first occurrence")
                         .processingTimeNanos(processingTimeNanos)
                         .build();
             } else {
@@ -92,11 +90,9 @@ public class RedisIdempotencyService implements IdempotencyService {
                 log.debug("Duplicate idempotency key detected in Redis: {}", key);
                 return IdempotencyResponse.builder()
                         .idempotencyKey(request.getIdempotencyKey())
-                        .isNew(false)
                         .isDuplicate(true)
                         .createdAt(existingCreatedAt)
                         .expiresAt(existingExpiresAt)
-                        .message("Duplicate request detected")
                         .processingTimeNanos(System.nanoTime() - startNanos)
                         .build();
             }

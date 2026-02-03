@@ -38,24 +38,20 @@ Atomically checks if an idempotency key exists and inserts it if not.
 ```json
 {
   "idempotencyKey": "unique-key-123",
-  "isNew": true,
   "isDuplicate": false,
   "createdAt": "2026-01-28T10:30:00Z",
   "expiresAt": "2026-01-28T11:30:00Z",
-  "message": "Key accepted - first occurrence",
   "processingTimeNanos": 45000
 }
 ```
 
-**Response (409 Conflict - Duplicate Key):**
+**Response (200 OK - Duplicate Key):**
 ```json
 {
   "idempotencyKey": "unique-key-123",
-  "isNew": false,
   "isDuplicate": true,
   "createdAt": "2026-01-28T10:30:00Z",
   "expiresAt": "2026-01-28T11:30:00Z",
-  "message": "Duplicate request detected",
   "processingTimeNanos": 32000
 }
 ```

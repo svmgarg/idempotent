@@ -77,7 +77,6 @@ class IdempotencyControllerEdgeCaseTest {
 
         IdempotencyResponse mockResponse = IdempotencyResponse.builder()
                 .idempotencyKey("new-key")
-                .isNew(true)
                 .isDuplicate(false)
                 .createdAt(Instant.now())
                 .build();
@@ -88,7 +87,7 @@ class IdempotencyControllerEdgeCaseTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().isNew()).isTrue();
+        assertThat(response.getBody().isDuplicate()).isFalse();
     }
 
     @Test
@@ -100,7 +99,6 @@ class IdempotencyControllerEdgeCaseTest {
 
         IdempotencyResponse mockResponse = IdempotencyResponse.builder()
                 .idempotencyKey("duplicate-key")
-                .isNew(false)
                 .isDuplicate(true)
                 .createdAt(Instant.now())
                 .build();
@@ -125,7 +123,6 @@ class IdempotencyControllerEdgeCaseTest {
 
         IdempotencyResponse mockResponse = IdempotencyResponse.builder()
                 .idempotencyKey("full-request-key")
-                .isNew(true)
                 .isDuplicate(false)
                 .createdAt(Instant.now())
                 .expiresAt(Instant.now().plusSeconds(7200))
@@ -148,7 +145,6 @@ class IdempotencyControllerEdgeCaseTest {
 
         IdempotencyResponse mockResponse = IdempotencyResponse.builder()
                 .idempotencyKey("minimal-key")
-                .isNew(true)
                 .isDuplicate(false)
                 .createdAt(Instant.now())
                 .build();
@@ -188,14 +184,12 @@ class IdempotencyControllerEdgeCaseTest {
 
         IdempotencyResponse firstResponse = IdempotencyResponse.builder()
                 .idempotencyKey("rapid-key")
-                .isNew(true)
                 .isDuplicate(false)
                 .createdAt(Instant.now())
                 .build();
 
         IdempotencyResponse subsequentResponse = IdempotencyResponse.builder()
                 .idempotencyKey("rapid-key")
-                .isNew(false)
                 .isDuplicate(true)
                 .createdAt(Instant.now())
                 .build();

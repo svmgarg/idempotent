@@ -26,7 +26,7 @@ public class IdempotencyController {
      * Requires API Key authentication via header: X-API-KEY
      *
      * Returns:
-     * - 200 OK with isNew=true if the key was newly inserted (proceed with operation)
+     * - 200 OK with isDuplicate=false if the key was newly inserted (proceed with operation)
      * - 200 OK with isDuplicate=true if the key already exists (skip operation)
      * - 401 Unauthorized if API key is invalid or missing
      *
