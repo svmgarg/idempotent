@@ -600,8 +600,11 @@
                         </ul>
                     </div>
 
-                    <h3>Request Example</h3>
-                    <pre><code>POST http://144.24.119.46:8080/idempotency/check
+                    <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
+                        <summary style="cursor: pointer; font-weight: 500; color: #2c3e50;">
+                            📝 Request Example
+                        </summary>
+                        <pre style="margin-top: 10px;"><code>POST http://144.24.119.46:8080/idempotency/check
 Content-Type: application/json
 X-API-KEY: your-api-key-here
 
@@ -610,6 +613,7 @@ X-API-KEY: your-api-key-here
   "clientId": "client-A",
   "ttlSeconds": 3600
 }</code></pre>
+                    </details>
 
                     <h3>Response Body</h3>
                     <table class="parameter-table">
@@ -804,11 +808,18 @@ Content-Type: application/json
                         <p>Health check endpoint that returns the operational status of the service.</p>
                     </div>
 
-                    <h3>Request Example</h3>
-                    <pre><code>GET http://144.24.119.46:8080/idempotency/health</code></pre>
+                    <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
+                        <summary style="cursor: pointer; font-weight: 500; color: #2c3e50;">
+                            📝 Request Example
+                        </summary>
+                        <pre style="margin-top: 10px;"><code>GET http://144.24.119.46:8080/idempotency/health</code></pre>
+                    </details>
 
-                    <h3>Response Example</h3>
-                    <pre><code>HTTP/1.1 200 OK
+                    <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
+                        <summary style="cursor: pointer; font-weight: 500; color: #2c3e50;">
+                            📤 Response Example
+                        </summary>
+                        <pre style="margin-top: 10px;"><code>HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
@@ -817,6 +828,7 @@ Content-Type: application/json
   "timestamp": "2026-02-03T16:30:00.123Z",
   "message": "Service is healthy and operational"
 }</code></pre>
+                    </details>
                 </div>
 
                 <div class="endpoint">
@@ -830,14 +842,22 @@ Content-Type: application/json
                         <p>Simple ping endpoint to verify service availability.</p>
                     </div>
 
-                    <h3>Request Example</h3>
-                    <pre><code>GET http://144.24.119.46:8080/idempotency/ping</code></pre>
+                    <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
+                        <summary style="cursor: pointer; font-weight: 500; color: #2c3e50;">
+                            📝 Request Example
+                        </summary>
+                        <pre style="margin-top: 10px;"><code>GET http://144.24.119.46:8080/idempotency/ping</code></pre>
+                    </details>
 
-                    <h3>Response Example</h3>
-                    <pre><code>HTTP/1.1 200 OK
+                    <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
+                        <summary style="cursor: pointer; font-weight: 500; color: #2c3e50;">
+                            📤 Response Example
+                        </summary>
+                        <pre style="margin-top: 10px;"><code>HTTP/1.1 200 OK
 Content-Type: text/plain
 
 pong</code></pre>
+                    </details>
                 </div>
             </section>
 
@@ -845,8 +865,11 @@ pong</code></pre>
             <section class="section" id="examples">
                 <h2>💡 Usage Examples</h2>
 
-                <h3>cURL Example</h3>
-                <pre><code># Check idempotency (first request - new key)
+                <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
+                    <summary style="cursor: pointer; font-weight: 500; color: #2c3e50;">
+                        🔧 cURL Example
+                    </summary>
+                    <pre style="margin-top: 10px;"><code># Check idempotency (first request - new key)
 curl -X POST http://144.24.119.46:8080/idempotency/check \
   -H "Content-Type: application/json" \
   -H "X-API-KEY: your-api-key" \
@@ -868,9 +891,13 @@ curl -X POST http://144.24.119.46:8080/idempotency/check \
   }'
 
 # Response: {"isDuplicate": true, ...} - Skip operation</code></pre>
+                </details>
 
-                <h3>JavaScript/Fetch Example</h3>
-                <pre><code>async function checkIdempotency(key, clientId) {
+                <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
+                    <summary style="cursor: pointer; font-weight: 500; color: #2c3e50;">
+                        🔗 JavaScript/Fetch Example
+                    </summary>
+                    <pre style="margin-top: 10px;"><code>async function checkIdempotency(key, clientId) {
   const response = await fetch('http://144.24.119.46:8080/idempotency/check', {
     method: 'POST',
     headers: {
@@ -894,9 +921,13 @@ curl -X POST http://144.24.119.46:8080/idempotency/check \
     return true;
   }
 }</code></pre>
+                </details>
 
-                <h3>Python Example</h3>
-                <pre><code>import requests
+                <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
+                    <summary style="cursor: pointer; font-weight: 500; color: #2c3e50;">
+                        🐍 Python Example
+                    </summary>
+                    <pre style="margin-top: 10px;"><code>import requests
 
 def check_idempotency(key, client_id):
     response = requests.post(
@@ -920,6 +951,7 @@ def check_idempotency(key, client_id):
     else:
         print('New request - proceeding with operation')
         return True</code></pre>
+                </details>
 
                 <h3>Integration Flow</h3>
                 <div class="info-box">
