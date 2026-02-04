@@ -312,6 +312,7 @@
             <p>Prevent Duplicate Operations with Atomic Check-and-Insert</p>
             <div class="nav-links">
                 <a href="#overview">Overview</a>
+                <a href="#use-cases">Use Cases</a>
                 <a href="#authentication">Authentication</a>
                 <a href="#check-api">Check API</a>
                 <a href="#health-api">Health API</a>
@@ -342,7 +343,334 @@
                 </div>
 
                 <h3>Base URL</h3>
-                <pre><code>http://localhost:8080/idempotency</code></pre>
+                <pre><code>http://144.24.119.46:8080/idempotency</code></pre>
+            </section>
+
+            <!-- Use Cases Section -->
+            <section class="section" id="use-cases">
+                <h2>🎯 Use Cases</h2>
+                <p class="description">
+                    The Idempotency Service helps you build reliable, fault-tolerant applications by preventing duplicate operations. 
+                    The core idea is simple: <strong>before processing any critical operation, register its unique ID with our service</strong>. 
+                    If the same ID comes again (due to retries, network issues, or user error), we tell you it's already been processed.
+                </p>
+
+                <div class="warning-box" style="background: #e8f4fd; border-left-color: #2196F3;">
+                    <strong>🔑 How It Works:</strong>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Your system receives a request with a unique identifier (Payment ID, Order ID, Zap ID, etc.)</li>
+                        <li>Before processing, call our <code>/check</code> API with this ID as the idempotency key</li>
+                        <li>If <code>isDuplicate: false</code> → This is the first time. Proceed with processing.</li>
+                        <li>If <code>isDuplicate: true</code> → Already processed before. Skip and return cached/previous result.</li>
+                    </ol>
+                </div>
+
+                <div class="endpoint" style="border-left-color: #28a745;">
+                    <h3 style="color: #28a745; margin-top: 0;">💳 Payment Processing - Avoid Double Charges</h3>
+                    <p class="description">
+                        <strong>Scenario:</strong> Your payment gateway sends you a <code>payment_id: "pay_abc123"</code>. 
+                        Due to network timeout, the gateway retries and sends the same payment notification again.
+                    </p>
+                    <p class="description">
+                        <strong>Without Idempotency:</strong> You charge the customer twice for the same payment.
+                    </p>
+                    <p class="description">
+                        <strong>With Idempotency:</strong> Before processing, check if <code>pay_abc123</code> was already processed. 
+                        On retry, our service returns <code>isDuplicate: true</code> — you skip the duplicate charge.
+                    </p>
+                    <pre style="margin-top: 15px;"><code>// First request
+POST /idempotency/check {"idempotencyKey": "pay_abc123"} → isDuplicate: false ✅ Process payment
+
+// Retry (same payment_id)
+POST /idempotency/check {"idempotencyKey": "pay_abc123"} → isDuplicate: true ⏭️ Skip, already done</code></pre>
+                    <div class="success-box">
+                        <strong>✅ Result:</strong> Customer charged exactly once, regardless of how many times the request arrives.
+                    </div>
+                </div>
+
+                <div class="endpoint" style="border-left-color: #007bff;">
+                    <h3 style="color: #007bff; margin-top: 0;">🎫 Booking Systems - Prevent Double Reservations</h3>
+                    <p class="description">
+                        <strong>Scenario:</strong> A user clicks "Book Now" for a flight with <code>booking_ref: "BK-789"</code>. 
+                        Slow network causes them to click again, or your system retries the failed request.
+                    </p>
+                    <p class="description">
+                        <strong>Without Idempotency:</strong> User ends up with 2 seats booked and charged twice.
+                    </p>
+                    <p class="description">
+                        <strong>With Idempotency:</strong> Register <code>BK-789</code> before creating the booking. 
+                        Any duplicate attempt returns <code>isDuplicate: true</code> — second booking is blocked.
+                    </p>
+                    <pre style="margin-top: 15px;"><code>// User clicks "Book"
+POST /idempotency/check {"idempotencyKey": "BK-789"} → isDuplicate: false ✅ Create booking
+
+// User clicks again (impatient)
+POST /idempotency/check {"idempotencyKey": "BK-789"} → isDuplicate: true ⏭️ Return existing booking</code></pre>
+                    <div class="success-box">
+                        <strong>✅ Result:</strong> One seat reserved, one charge, happy customer.
+                    </div>
+                </div>
+
+                <div class="endpoint" style="border-left-color: #fd7e14;">
+                    <h3 style="color: #fd7e14; margin-top: 0;">⚡ Zapier / Webhook Integration - Handle Retries Safely</h3>
+                    <p class="description">
+                        <strong>Scenario:</strong> You have a Zapier workflow that triggers on new orders. Zapier sends a 
+                        <code>zap_id: "zap_event_456"</code> to your endpoint. Due to Zapier's retry policy, the same event is delivered 3 times.
+                    </p>
+                    <p class="description">
+                        <strong>Without Idempotency:</strong> Your workflow runs 3 times — 3 emails sent, 3 records created, chaos.
+                    </p>
+                    <p class="description">
+                        <strong>With Idempotency:</strong> Use the <code>zap_id</code> as your idempotency key. Only the first delivery 
+                        is processed; duplicates are automatically detected and skipped.
+                    </p>
+                    <pre style="margin-top: 15px;"><code>// Zapier sends event (1st delivery)
+POST /idempotency/check {"idempotencyKey": "zap_event_456"} → isDuplicate: false ✅ Run workflow
+
+// Zapier retries (2nd delivery)
+POST /idempotency/check {"idempotencyKey": "zap_event_456"} → isDuplicate: true ⏭️ Skip
+
+// Zapier retries again (3rd delivery)
+POST /idempotency/check {"idempotencyKey": "zap_event_456"} → isDuplicate: true ⏭️ Skip</code></pre>
+                    <div class="success-box">
+                        <strong>✅ Result:</strong> Workflow executes exactly once per unique Zap event.
+                    </div>
+                </div>
+
+                <div class="endpoint" style="border-left-color: #20c997;">
+                    <h3 style="color: #20c997; margin-top: 0;">💰 Zapier + E-Commerce: Duplicate Order Processing</h3>
+                    <p class="description">
+                        <strong>Scenario:</strong> Your Zapier workflow monitors your e-commerce platform for new orders. 
+                        When an order is placed with <code>order_id: "order_12345"</code>, it's automatically sent to your fulfillment system. 
+                        Network latency causes Zapier to retry the webhook delivery multiple times.
+                    </p>
+                    <p class="description">
+                        <strong>Without Idempotency:</strong> Same order is sent to fulfillment multiple times — customer receives duplicate packages, 
+                        inventory is double-deducted, shipping costs increase unnecessarily.
+                    </p>
+                    <p class="description">
+                        <strong>With Idempotency:</strong> Register <code>order_12345</code> as idempotency key before sending to fulfillment. 
+                        Zapier retries are detected and skipped, ensuring each order is fulfilled exactly once.
+                    </p>
+                    <pre style="margin-top: 15px;"><code>// Zapier: New order detected
+POST /idempotency/check {"idempotencyKey": "order-order_12345"} → isDuplicate: false ✅ Send to fulfillment
+
+// Zapier webhook retry (network issue)
+POST /idempotency/check {"idempotencyKey": "order-order_12345"} → isDuplicate: true ⏭️ Skip fulfillment</code></pre>
+                    <div class="success-box">
+                        <strong>✅ Result:</strong> One order fulfilled, inventory accurate, customer receives one package.
+                    </div>
+                </div>
+
+                <div class="endpoint" style="border-left-color: #e83e8c;">
+                    <h3 style="color: #e83e8c; margin-top: 0;">💳 Zapier + Payment Processing: Duplicate Payment Records</h3>
+                    <p class="description">
+                        <strong>Scenario:</strong> Zapier monitors your payment gateway for successful payment events. 
+                        When a payment is completed with <code>payment_id: "pay_9876"</code>, it triggers a workflow 
+                        to automatically record it in your accounting system.
+                    </p>
+                    <p class="description">
+                        <strong>Without Idempotency:</strong> Same payment appears twice in your accounting records, 
+                        skewing revenue reports and confusing your finance team.
+                    </p>
+                    <p class="description">
+                        <strong>With Idempotency:</strong> Use payment ID as idempotency key. 
+                        Even if Zapier retries multiple times, the payment record is created only once.
+                    </p>
+                    <pre style="margin-top: 15px;"><code>// Zapier: Payment succeeded
+POST /idempotency/check {"idempotencyKey": "pay_9876"} → isDuplicate: false ✅ Create accounting record
+
+// Zapier webhook retried due to timeout
+POST /idempotency/check {"idempotencyKey": "pay_9876"} → isDuplicate: true ⏭️ Skip</code></pre>
+                    <div class="success-box">
+                        <strong>✅ Result:</strong> Accurate accounting records, clean revenue reports, no duplicates.
+                    </div>
+                </div>
+
+                <div class="endpoint" style="border-left-color: #6c63ff;">
+                    <h3 style="color: #6c63ff; margin-top: 0;">👥 Zapier + CRM: Duplicate Contact Syncing</h3>
+                    <p class="description">
+                        <strong>Scenario:</strong> Your Zapier workflow syncs new contacts from form submissions to your CRM system. 
+                        Each submission comes with a unique <code>form_submission_id: "fsub_5678"</code>. 
+                        Due to CRM API timeouts, Zapier retries the contact creation multiple times.
+                    </p>
+                    <p class="description">
+                        <strong>Without Idempotency:</strong> Same contact is created multiple times in your CRM, 
+                        creating duplicates that confuse your sales team and break follow-up workflows.
+                    </p>
+                    <p class="description">
+                        <strong>With Idempotency:</strong> Register <code>fsub_5678</code> before creating the contact. 
+                        Zapier retries detect the duplicate and skip contact creation, preventing CRM pollution.
+                    </p>
+                    <pre style="margin-top: 15px;"><code>// Zapier: New form submission
+POST /idempotency/check {"idempotencyKey": "contact-fsub_5678"} → isDuplicate: false ✅ Create CRM contact
+
+// Zapier retried due to CRM timeout
+POST /idempotency/check {"idempotencyKey": "contact-fsub_5678"} → isDuplicate: true ⏭️ Skip creation</code></pre>
+                    <div class="success-box">
+                        <strong>✅ Result:</strong> Clean CRM database, no duplicates, accurate customer records.
+                    </div>
+                </div>
+
+                <div class="endpoint" style="border-left-color: #ff6b6b;">
+                    <h3 style="color: #ff6b6b; margin-top: 0;">📧 Zapier + Email Marketing: Duplicate Subscriber Addition</h3>
+                    <p class="description">
+                        <strong>Scenario:</strong> Zapier automatically adds new webinar registrants to your email marketing platform. 
+                        Each registrant has a unique <code>registration_id: "reg_9876"</code>. 
+                        When your registration system experiences a spike, Zapier queues the request and retries on failure.
+                    </p>
+                    <p class="description">
+                        <strong>Without Idempotency:</strong> Same person gets added to your email list multiple times, 
+                        receives duplicate welcome emails, and your unsubscribe rates spike due to spam perception.
+                    </p>
+                    <p class="description">
+                        <strong>With Idempotency:</strong> Register <code>reg_9876</code> before adding to your email platform. 
+                        Duplicate additions are detected and skipped, keeping your list clean.
+                    </p>
+                    <pre style="margin-top: 15px;"><code>// Zapier: New webinar registration
+POST /idempotency/check {"idempotencyKey": "email-reg_9876"} → isDuplicate: false ✅ Add to email list
+
+// Zapier retried after queue processing
+POST /idempotency/check {"idempotencyKey": "email-reg_9876"} → isDuplicate: true ⏭️ Skip email addition</code></pre>
+                    <div class="success-box">
+                        <strong>✅ Result:</strong> Clean email lists, no duplicate subscribers, better engagement metrics.
+                    </div>
+                </div>
+
+                <div class="endpoint" style="border-left-color: #13547a;">
+                    <h3 style="color: #13547a; margin-top: 0;">📊 Zapier + Analytics: Duplicate Event Tracking</h3>
+                    <p class="description">
+                        <strong>Scenario:</strong> Zapier sends user behavior events from your app to your analytics platform. 
+                        Each event has <code>event_id: "evt_analytics_2024"</code>. 
+                        Network instability causes Zapier to retry event delivery multiple times.
+                    </p>
+                    <p class="description">
+                        <strong>Without Idempotency:</strong> Same user action is recorded 3-5 times, 
+                        inflating your analytics metrics and giving incorrect insights about user behavior.
+                    </p>
+                    <p class="description">
+                        <strong>With Idempotency:</strong> Use event ID as idempotency key. 
+                        Even if Zapier retries, each event is recorded only once in analytics.
+                    </p>
+                    <pre style="margin-top: 15px;"><code>// Zapier: User clicked "Download" button
+POST /idempotency/check {"idempotencyKey": "analytics-evt_analytics_2024"} → isDuplicate: false ✅ Track event
+
+// Zapier webhook retry
+POST /idempotency/check {"idempotencyKey": "analytics-evt_analytics_2024"} → isDuplicate: true ⏭️ Skip</code></pre>
+                    <div class="success-box">
+                        <strong>✅ Result:</strong> Accurate analytics, reliable insights, correct user behavior data.
+                    </div>
+                </div>
+
+                <div class="endpoint" style="border-left-color: #ff9f43;">
+                    <h3 style="color: #ff9f43; margin-top: 0;">🏦 Zapier + Accounting: Duplicate Invoice Creation</h3>
+                    <p class="description">
+                        <strong>Scenario:</strong> Zapier automatically creates invoices in your accounting system when customers make purchases. 
+                        Each purchase has <code>transaction_ref: "txn_acc_001"</code>. 
+                        Your accounting system API occasionally times out, causing Zapier to queue and retry the request.
+                    </p>
+                    <p class="description">
+                        <strong>Without Idempotency:</strong> Same invoice is created multiple times, 
+                        causing duplicate charges to customer, accounting mismatches, and audit issues.
+                    </p>
+                    <p class="description">
+                        <strong>With Idempotency:</strong> Register transaction reference before creating invoice. 
+                        Zapier retries detect it's already processed and skip invoice creation.
+                    </p>
+                    <pre style="margin-top: 15px;"><code>// Zapier: New purchase confirmed
+POST /idempotency/check {"idempotencyKey": "invoice-txn_acc_001"} → isDuplicate: false ✅ Create invoice
+
+// Zapier retried after timeout
+POST /idempotency/check {"idempotencyKey": "invoice-txn_acc_001"} → isDuplicate: true ⏭️ Skip</code></pre>
+                    <div class="success-box">
+                        <strong>✅ Result:</strong> Accurate invoicing, correct accounting records, no duplicate charges.
+                    </div>
+                </div>
+
+                <div class="endpoint" style="border-left-color: #6f42c1;">
+                    <h3 style="color: #6f42c1; margin-top: 0;">📦 Order Processing - Stop Duplicate Orders</h3>
+                    <p class="description">
+                        <strong>Scenario:</strong> Your e-commerce platform generates <code>order_id: "ORD-2026-001234"</code> when a customer 
+                        checks out. Network glitch causes the order submission to timeout and retry.
+                    </p>
+                    <p class="description">
+                        <strong>Without Idempotency:</strong> Customer receives 2 identical orders and is charged twice.
+                    </p>
+                    <p class="description">
+                        <strong>With Idempotency:</strong> Register the <code>order_id</code> before processing. 
+                        Retries hit our service, see it's a duplicate, and the order is processed only once.
+                    </p>
+                    <pre style="margin-top: 15px;"><code>// Order submitted
+POST /idempotency/check {"idempotencyKey": "ORD-2026-001234"} → isDuplicate: false ✅ Process order
+
+// Network retry
+POST /idempotency/check {"idempotencyKey": "ORD-2026-001234"} → isDuplicate: true ⏭️ Return existing order</code></pre>
+                    <div class="success-box">
+                        <strong>✅ Result:</strong> One order created, correct inventory, accurate billing.
+                    </div>
+                </div>
+
+                <div class="endpoint" style="border-left-color: #17a2b8;">
+                    <h3 style="color: #17a2b8; margin-top: 0;">📧 Notifications - No Spam to Customers</h3>
+                    <p class="description">
+                        <strong>Scenario:</strong> Your system sends order confirmation emails. The email job fails mid-way 
+                        and is retried by your queue system with the same <code>notification_id: "notif_xyz"</code>.
+                    </p>
+                    <p class="description">
+                        <strong>Without Idempotency:</strong> Customer gets the same email 5 times. They unsubscribe or report spam.
+                    </p>
+                    <p class="description">
+                        <strong>With Idempotency:</strong> Before sending, check if <code>notif_xyz</code> was already sent. 
+                        Duplicates are blocked at the source.
+                    </p>
+                    <pre style="margin-top: 15px;"><code>// First attempt
+POST /idempotency/check {"idempotencyKey": "notif_xyz"} → isDuplicate: false ✅ Send email
+
+// Queue retry
+POST /idempotency/check {"idempotencyKey": "notif_xyz"} → isDuplicate: true ⏭️ Email already sent, skip</code></pre>
+                    <div class="success-box">
+                        <strong>✅ Result:</strong> Each notification sent exactly once. No customer complaints.
+                    </div>
+                </div>
+
+                <div class="endpoint" style="border-left-color: #dc3545;">
+                    <h3 style="color: #dc3545; margin-top: 0;">🔄 API Retries on Transient Failures</h3>
+                    <p class="description">
+                        <strong>Scenario:</strong> Your service calls an external API to transfer funds with <code>transfer_id: "TXN-98765"</code>. 
+                        The API succeeds but the response is lost due to a network drop. Your retry logic kicks in.
+                    </p>
+                    <p class="description">
+                        <strong>Without Idempotency:</strong> Money is transferred twice because you didn't know the first attempt succeeded.
+                    </p>
+                    <p class="description">
+                        <strong>With Idempotency:</strong> You registered <code>TXN-98765</code> before the transfer. 
+                        On retry, you know it was already processed — return success without re-transferring.
+                    </p>
+                    <pre style="margin-top: 15px;"><code>// Original request
+POST /idempotency/check {"idempotencyKey": "TXN-98765"} → isDuplicate: false ✅ Transfer funds
+// Transfer succeeds, but response lost...
+
+// Automatic retry
+POST /idempotency/check {"idempotencyKey": "TXN-98765"} → isDuplicate: true ⏭️ Already done, return success</code></pre>
+                    <div class="success-box">
+                        <strong>✅ Result:</strong> Safe retries. Money transferred exactly once.
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <strong>💡 Key Takeaway:</strong> Any unique identifier from your system or upstream services 
+                    (Payment ID, Order ID, Zap ID, Transaction ID, Event ID, etc.) can be used as an idempotency key. 
+                    Register it with our service <em>before</em> processing, and you're protected against duplicates forever (until TTL expires).
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Best Practice for Keys:</strong>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>Use existing IDs:</strong> Payment ID, Order ID, Zap ID, Transaction Reference — don't generate new ones</li>
+                        <li><strong>Be specific:</strong> Include operation type if the same ID is used for different actions (e.g., <code>charge-pay_123</code> vs <code>refund-pay_123</code>)</li>
+                        <li><strong>Set appropriate TTL:</strong> Use <code>ttlSeconds</code> based on how long duplicates are possible (default: 1 hour)</li>
+                    </ul>
+                </div>
             </section>
 
             <!-- Authentication Section -->
@@ -370,25 +698,6 @@
                     </p>
                 </div>
 
-                <h3>API Key Configuration</h3>
-                <p>
-                    The service supports <strong>multiple API keys</strong> configured in <code>apiKey.json</code>.
-                </p>
-                <div class="info-box">
-                    <strong>📝 Configuration Format:</strong>
-                    <pre><code>{
-  "apiKeys": ["key1", "key2", "key3", ...]
-}</code></pre>
-                    <p style="margin-top: 10px;">
-                        The service automatically loads all keys in the array. Any of these keys can be used for authentication.
-                    </p>
-                </div>
-
-                <div class="warning-box" style="background: #f0f0f0; border-left-color: #666;">
-                    <strong>🔒 Security Note:</strong> The <code>apiKey.json</code> file is stored on the server and is not accessible to end users. 
-                    API keys are managed by the service administrator and distributed to authorized clients.
-                </div>
-
                 <h3>Header</h3>
                 <table class="parameter-table">
                     <thead>
@@ -406,12 +715,6 @@
                         </tr>
                     </tbody>
                 </table>
-
-                <div class="info-box">
-                    <strong>✅ Backward Compatibility:</strong> The service also supports the legacy single-key format:
-                    <pre><code>{"apiKey": "singleKey"}</code></pre>
-                    If you're using the old format, it will be automatically recognized.
-                </div>
 
                 <div class="warning-box">
                     <strong>⚠️ Important:</strong> The <code>/health</code> and <code>/ping</code> endpoints do not require authentication.
@@ -474,7 +777,7 @@
                     </table>
 
                     <h3>Request Example</h3>
-                    <pre><code>POST /idempotency/check
+                    <pre><code>POST http://144.24.119.46:8080/idempotency/check
 Content-Type: application/json
 X-API-KEY: your-api-key-here
 
@@ -589,7 +892,7 @@ Content-Type: application/json
                     </div>
 
                     <h3>Request Example</h3>
-                    <pre><code>GET /idempotency/health</code></pre>
+                    <pre><code>GET http://144.24.119.46:8080/idempotency/health</code></pre>
 
                     <h3>Response Example</h3>
                     <pre><code>HTTP/1.1 200 OK
@@ -615,7 +918,7 @@ Content-Type: application/json
                     </div>
 
                     <h3>Request Example</h3>
-                    <pre><code>GET /idempotency/ping</code></pre>
+                    <pre><code>GET http://144.24.119.46:8080/idempotency/ping</code></pre>
 
                     <h3>Response Example</h3>
                     <pre><code>HTTP/1.1 200 OK
@@ -631,7 +934,7 @@ pong</code></pre>
 
                 <h3>cURL Example</h3>
                 <pre><code># Check idempotency (first request - new key)
-curl -X POST http://localhost:8080/idempotency/check \
+curl -X POST http://144.24.119.46:8080/idempotency/check \
   -H "Content-Type: application/json" \
   -H "X-API-KEY: your-api-key" \
   -d '{
@@ -643,7 +946,7 @@ curl -X POST http://localhost:8080/idempotency/check \
 # Response: {"isDuplicate": false, ...} - Proceed with operation
 
 # Check same key again (duplicate)
-curl -X POST http://localhost:8080/idempotency/check \
+curl -X POST http://144.24.119.46:8080/idempotency/check \
   -H "Content-Type: application/json" \
   -H "X-API-KEY: your-api-key" \
   -d '{
@@ -655,7 +958,7 @@ curl -X POST http://localhost:8080/idempotency/check \
 
                 <h3>JavaScript/Fetch Example</h3>
                 <pre><code>async function checkIdempotency(key, clientId) {
-  const response = await fetch('http://localhost:8080/idempotency/check', {
+  const response = await fetch('http://144.24.119.46:8080/idempotency/check', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -684,7 +987,7 @@ curl -X POST http://localhost:8080/idempotency/check \
 
 def check_idempotency(key, client_id):
     response = requests.post(
-        'http://localhost:8080/idempotency/check',
+        'http://144.24.119.46:8080/idempotency/check',
         headers={
             'Content-Type': 'application/json',
             'X-API-KEY': 'your-api-key'
@@ -722,42 +1025,6 @@ def check_idempotency(key, client_id):
                 </div>
             </section>
 
-            <!-- Configuration Section -->
-            <section class="section" id="configuration">
-                <h2>⚙️ Configuration</h2>
-
-                <h3>Storage Backend</h3>
-                <p class="description">
-                    The service supports two storage backends configured via <code>application.yml</code>:
-                </p>
-
-                <table class="parameter-table">
-                    <thead>
-                        <tr>
-                            <th>Property</th>
-                            <th>Value</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code>idempotency.storage</code></td>
-                            <td><code>memory</code></td>
-                            <td>In-memory storage using ConcurrentHashMap (default, single-instance)</td>
-                        </tr>
-                        <tr>
-                            <td><code>idempotency.storage</code></td>
-                            <td><code>redis</code></td>
-                            <td>Redis storage for distributed deployments</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <h3>Default TTL</h3>
-                <pre><code>idempotency:
-  storage: memory
-  default-ttl-seconds: 3600  # 1 hour default</code></pre>
-            </section>
         </div>
 
         <footer>
