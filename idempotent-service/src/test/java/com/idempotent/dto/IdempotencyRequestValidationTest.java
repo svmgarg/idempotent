@@ -80,7 +80,7 @@ class IdempotencyRequestValidationTest {
     @Test
     @DisplayName("Should fail validation when idempotency key exceeds max length")
     void shouldFailValidationWhenKeyExceedsMaxLength() {
-        String longKey = "a".repeat(33); // Exceeds max of 32
+        String longKey = "a".repeat(65); // Exceeds max of 64
         IdempotencyRequest request = IdempotencyRequest.builder()
                 .idempotencyKey(longKey)
                 .build();
@@ -89,13 +89,13 @@ class IdempotencyRequestValidationTest {
         
         assertThat(violations).hasSize(1);
         assertThat(violations.iterator().next().getMessage())
-                .contains("must be between 1 and 32 characters");
+                .contains("must be between 1 and 64 characters");
     }
 
     @Test
     @DisplayName("Should pass validation when idempotency key is at max length")
     void shouldPassValidationWhenKeyAtMaxLength() {
-        String maxKey = "a".repeat(32); // Max length is now 32
+        String maxKey = "a".repeat(64); // Max length is now 64
         IdempotencyRequest request = IdempotencyRequest.builder()
                 .idempotencyKey(maxKey)
                 .build();
@@ -108,7 +108,7 @@ class IdempotencyRequestValidationTest {
     @Test
     @DisplayName("Should fail validation when clientId exceeds max length")
     void shouldFailValidationWhenClientIdExceedsMaxLength() {
-        String longClientId = "c".repeat(129);
+        String longClientId = "c".repeat(65);
         IdempotencyRequest request = IdempotencyRequest.builder()
                 .idempotencyKey("valid-key")
                 .clientId(longClientId)
@@ -118,7 +118,7 @@ class IdempotencyRequestValidationTest {
         
         assertThat(violations).hasSize(1);
         assertThat(violations.iterator().next().getMessage())
-                .contains("must not exceed 128 characters");
+                .contains("must not exceed 64 characters");
     }
 
     @Test

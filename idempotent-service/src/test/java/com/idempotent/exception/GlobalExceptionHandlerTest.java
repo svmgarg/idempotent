@@ -48,8 +48,8 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Should return 200 OK with resultStatusCode 400 for oversized idempotency key")
     void shouldHandleOversizedIdempotencyKey() throws Exception {
-        // Create a key longer than 32 characters
-        String longKey = "x".repeat(33);
+        // Create a key longer than 64 characters
+        String longKey = "x".repeat(65);
         String invalidRequest = "{\"idempotencyKey\": \"" + longKey + "\"}";
 
         mockMvc.perform(post("/idempotency/check")
@@ -62,7 +62,7 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Should return 200 OK with resultStatusCode 400 for oversized client ID")
     void shouldHandleOversizedClientId() throws Exception {
-        String longClientId = "x".repeat(129);
+        String longClientId = "x".repeat(65);
         String invalidRequest = "{\"idempotencyKey\": \"key123\", \"clientId\": \"" + longClientId + "\"}";
 
         mockMvc.perform(post("/idempotency/check")

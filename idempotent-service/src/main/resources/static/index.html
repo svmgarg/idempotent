@@ -325,29 +325,35 @@
             <!-- Overview Section -->
             <section class="section" id="overview">
                 <h2>📖 Overview</h2>
+                <p class="description" style="font-size: 1.05em; line-height: 1.8; color: #2c3e50;">
+                    <strong style="font-size: 1.15em;">The Idempotency Service is your safety net against duplicate triggers.</strong> 
+                </p>
                 <p class="description">
-                    The Idempotency Service is your safety net against duplicate triggers. Whether due to network failures, 
-                    user retries, or system crashes, duplicate requests can wreak havoc on your business. 
-                    This service ensures that critical operations—like payments, orders, and account updates—happen exactly once, 
-                    no matter how many times the request is sent within your configured time window.
+                    In distributed systems, the same request can arrive multiple times due to network failures, user retries, automation tool retries, or client-side issues. 
+                    Without idempotency, this means the same operation gets executed multiple times—resulting in duplicate charges, double-booked seats, duplicate orders, or duplicate notifications.
+                </p>
+                <p class="description">
+                    This service <strong>identifies when the same request is sent twice</strong> (detects duplicate triggers) so your application can:
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>✅ Detect that a request is a duplicate (same unique ID arriving again)</li>
+                        <li>✅ Skip re-executing the operation</li>
+                        <li>✅ Return your previously cached result</li>
+                    </ul>
                 </p>
                 
                 <div class="info-box">
-                    <strong>What You Get:</strong>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li>✅ Zero duplicate charges or transactions</li>
-                        <li>✅ Reliable operation execution with automatic retry handling</li>
-                        <li>✅ Configurable memory duration—remember operations for as long as you need (default: 1 hour)</li>
-                        <li>✅ Perfect for payment systems, order processing, and automation workflows</li>
-                        <li>✅ Enterprise-grade security with API Key authentication</li>
-                        <li>✅ Simple integration—just call our API before processing</li>
-                    </ul>
+                    <strong>How It Works:</strong>
+                    <ol style="margin-left: 20px; margin-top: 10px; line-height: 1.8;">
+                        <li><strong>First Request:</strong> Your app calls <code>/check</code> with a unique ID → Returns <code>isDuplicate: false</code></li>
+                        <li><strong>Process:</strong> Your app executes the operation (payment, order, etc.) and caches the result</li>
+                        <li><strong>Duplicate Request:</strong> Same ID arrives again → Calls <code>/check</code> → Returns <code>isDuplicate: true</code></li>
+                        <li><strong>Skip:</strong> Your app returns the cached result WITHOUT re-executing</li>
+                    </ol>
                 </div>
 
                 <div class="warning-box">
-                    <strong>⏱️ Important to Know:</strong> We remember processed operations for a configurable time window (TTL). 
-                    After this window expires, the same operation key can be processed again. 
-                    Set your TTL based on your expected retry window—longer for systems with slower retries, shorter for real-time systems.
+                    <strong>⏱️ Memory Window:</strong> We track operation IDs for a configurable time period (default: 1 hour). 
+                    After this window expires, we forget the ID and treat new requests with that ID as new operations.
                 </div>
 
                 <h3>Base URL</h3>
@@ -356,16 +362,9 @@
 
             <!-- Use Cases Section -->
             <section class="section" id="use-cases">
-                <h2>✅ Use Cases</h2>
-                <p class="description" style="font-size: 1.1em; color: #2c3e50; font-weight: 500;">
-                    <strong>The Idempotency Service is your safety net against duplicate triggers.</strong>
-                </p>
+                <h2>✅ Real-World Scenarios</h2>
                 <p class="description">
-                    Idempotency is critical in distributed systems because the same request can be sent multiple times due to retries, timeouts, automation tools, or network instability.
-                </p>
-                <p class="description">
-                    This service <strong>identifies when duplicate requests arrive</strong> and helps you build idempotent operations 
-                    by preventing duplicate processing. It also supports safe retries when the first attempt fails.
+                    Here are common situations where duplicate triggers occur and how this service helps:
                 </p>
 
                 <div class="endpoint" style="border-left-color: #28a745;">
@@ -573,14 +572,14 @@
                                 <td>string</td>
                                 <td><span class="badge required">Required</span></td>
                                 <td>Unique key to identify the operation</td>
-                                <td>Max 32 characters</td>
+                                <td>Max 64 characters</td>
                             </tr>
                             <tr>
                                 <td><code>clientId</code></td>
                                 <td>string</td>
                                 <td><span class="badge optional">Optional</span></td>
                                 <td>Client identifier for multi-tenant scenarios</td>
-                                <td>Max 128 characters</td>
+                                <td>Max 64 characters</td>
                             </tr>
                             <tr>
                                 <td><code>ttlSeconds</code></td>
@@ -595,7 +594,7 @@
                     <div class="warning-box">
                         <strong>⚠️ Validation Rules:</strong>
                         <ul style="margin-left: 20px; margin-top: 10px;">
-                            <li><strong>idempotencyKey:</strong> Must be between 1-32 characters. Use meaningful, unique identifiers (Payment ID, Order ID, etc.)</li>
+                            <li><strong>idempotencyKey:</strong> Must be between 1-64 characters. Use meaningful, unique identifiers (Payment ID, Order ID, etc.)</li>
                             <li><strong>ttlSeconds:</strong> Maximum 3600 seconds (1 hour). Default is 3600s if not specified. This limits how long we remember processed operations.</li>
                             <li>If you need longer memory windows, contact support for enterprise plans.</li>
                         </ul>
@@ -678,6 +677,68 @@ Content-Type: application/json
   "createdAt": "2026-02-03T16:30:00.123Z",
   "expiresAt": "2026-02-03T17:30:00.123Z",
   "processingTimeNanos": 8200
+}</code></pre>
+
+                    <div class="error-box">
+                        <strong>❌ Invalid Idempotency Key (Exceeds 64 chars)</strong>
+                    </div>
+                    <pre><code>POST /idempotency/check
+Content-Type: application/json
+
+{
+  "idempotencyKey": "this-is-a-very-long-key-that-exceeds-the-maximum-allowed-length-of-64-characters-xyz",
+  "ttlSeconds": 3600
+}</code></pre>
+                    <pre><code>HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "resultStatusCode": 400,
+  "message": "Validation failed",
+  "validationErrors": {
+    "idempotencyKey": "Idempotency key must be between 1 and 64 characters"
+  }
+}</code></pre>
+
+                    <div class="error-box">
+                        <strong>❌ TTL Exceeds Maximum (3600 seconds)</strong>
+                    </div>
+                    <pre><code>POST /idempotency/check
+Content-Type: application/json
+
+{
+  "idempotencyKey": "payment-123",
+  "ttlSeconds": 7200
+}</code></pre>
+                    <pre><code>HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "resultStatusCode": 400,
+  "message": "Validation failed",
+  "validationErrors": {
+    "ttlSeconds": "TTL cannot exceed 3600 seconds (1 hour)"
+  }
+}</code></pre>
+
+                    <div class="error-box">
+                        <strong>❌ Missing Required Idempotency Key</strong>
+                    </div>
+                    <pre><code>POST /idempotency/check
+Content-Type: application/json
+
+{
+  "ttlSeconds": 3600
+}</code></pre>
+                    <pre><code>HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "resultStatusCode": 400,
+  "message": "Validation failed",
+  "validationErrors": {
+    "idempotencyKey": "Idempotency key is required"
+  }
 }</code></pre>
 
                     <h3>Response Codes</h3>

@@ -16,10 +16,10 @@ import lombok.NoArgsConstructor;
 public class IdempotencyRequest {
 
     @NotBlank(message = "Idempotency key is required")
-    @Size(min = 1, max = 32, message = "Idempotency key must be between 1 and 32 characters")
+    @Size(min = 1, max = 64, message = "Idempotency key must be between 1 and 64 characters")
     private String idempotencyKey;
 
-    @Size(max = 128, message = "Client ID must not exceed 128 characters")
+    @Size(max = 64, message = "Client ID must not exceed 64 characters")
     private String clientId;
 
     @Max(value = 3600, message = "TTL cannot exceed 3600 seconds (1 hour)")
