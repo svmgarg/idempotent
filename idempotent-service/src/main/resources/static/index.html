@@ -651,10 +651,11 @@ X-API-KEY: your-api-key-here
 
                     <h3>Response Examples</h3>
                     
-                    <div class="success-box">
-                        <strong>✅ New Key (Proceed with Operation)</strong>
-                    </div>
-                    <pre><code>HTTP/1.1 200 OK
+                    <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
+                        <summary style="cursor: pointer; font-weight: 500; color: #28a745;">
+                            ✅ New Key (Proceed with Operation)
+                        </summary>
+                        <pre style="margin-top: 10px;"><code>HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
@@ -664,11 +665,13 @@ Content-Type: application/json
   "expiresAt": "2026-02-03T17:30:00.123Z",
   "processingTimeNanos": 12500
 }</code></pre>
+                    </details>
 
-                    <div class="info-box">
-                        <strong>ℹ️ Duplicate Key (Skip Operation)</strong>
-                    </div>
-                    <pre><code>HTTP/1.1 200 OK
+                    <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
+                        <summary style="cursor: pointer; font-weight: 500; color: #007bff;">
+                            ℹ️ Duplicate Key (Skip Operation)
+                        </summary>
+                        <pre style="margin-top: 10px;"><code>HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
@@ -678,18 +681,23 @@ Content-Type: application/json
   "expiresAt": "2026-02-03T17:30:00.123Z",
   "processingTimeNanos": 8200
 }</code></pre>
+                    </details>
 
-                    <div class="error-box">
-                        <strong>❌ Invalid Idempotency Key (Exceeds 64 chars)</strong>
-                    </div>
-                    <pre><code>POST /idempotency/check
+                    <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
+                        <summary style="cursor: pointer; font-weight: 500; color: #dc3545;">
+                            ❌ Invalid Idempotency Key (Exceeds 64 chars)
+                        </summary>
+                        <div style="margin-top: 10px;">
+                            <p style="margin: 10px 0; font-size: 0.9em; color: #666;">Request:</p>
+                            <pre><code>POST /idempotency/check
 Content-Type: application/json
 
 {
   "idempotencyKey": "this-is-a-very-long-key-that-exceeds-the-maximum-allowed-length-of-64-characters-xyz",
   "ttlSeconds": 3600
 }</code></pre>
-                    <pre><code>HTTP/1.1 200 OK
+                            <p style="margin: 10px 0; font-size: 0.9em; color: #666;">Response:</p>
+                            <pre><code>HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
@@ -699,18 +707,24 @@ Content-Type: application/json
     "idempotencyKey": "Idempotency key must be between 1 and 64 characters"
   }
 }</code></pre>
+                        </div>
+                    </details>
 
-                    <div class="error-box">
-                        <strong>❌ TTL Exceeds Maximum (3600 seconds)</strong>
-                    </div>
-                    <pre><code>POST /idempotency/check
+                    <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
+                        <summary style="cursor: pointer; font-weight: 500; color: #dc3545;">
+                            ❌ TTL Exceeds Maximum (3600 seconds)
+                        </summary>
+                        <div style="margin-top: 10px;">
+                            <p style="margin: 10px 0; font-size: 0.9em; color: #666;">Request:</p>
+                            <pre><code>POST /idempotency/check
 Content-Type: application/json
 
 {
   "idempotencyKey": "payment-123",
   "ttlSeconds": 7200
 }</code></pre>
-                    <pre><code>HTTP/1.1 200 OK
+                            <p style="margin: 10px 0; font-size: 0.9em; color: #666;">Response:</p>
+                            <pre><code>HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
@@ -720,17 +734,23 @@ Content-Type: application/json
     "ttlSeconds": "TTL cannot exceed 3600 seconds (1 hour)"
   }
 }</code></pre>
+                        </div>
+                    </details>
 
-                    <div class="error-box">
-                        <strong>❌ Missing Required Idempotency Key</strong>
-                    </div>
-                    <pre><code>POST /idempotency/check
+                    <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
+                        <summary style="cursor: pointer; font-weight: 500; color: #dc3545;">
+                            ❌ Missing Required Idempotency Key
+                        </summary>
+                        <div style="margin-top: 10px;">
+                            <p style="margin: 10px 0; font-size: 0.9em; color: #666;">Request:</p>
+                            <pre><code>POST /idempotency/check
 Content-Type: application/json
 
 {
   "ttlSeconds": 3600
 }</code></pre>
-                    <pre><code>HTTP/1.1 200 OK
+                            <p style="margin: 10px 0; font-size: 0.9em; color: #666;">Response:</p>
+                            <pre><code>HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
@@ -740,6 +760,8 @@ Content-Type: application/json
     "idempotencyKey": "Idempotency key is required"
   }
 }</code></pre>
+                        </div>
+                    </details>
 
                     <h3>Response Codes</h3>
                     <div style="margin: 20px 0;">
