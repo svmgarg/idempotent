@@ -682,16 +682,21 @@ Content-Type: application/json
 
                     <h3>Response Codes</h3>
                     <div style="margin: 20px 0;">
-                        <p><span class="response-code success">200 OK</span> Check completed successfully (new or duplicate)</p>
-                        <p><span class="response-code error">400 Bad Request</span> Invalid request body or validation error</p>
-                        <p><span class="response-code error">401 Unauthorized</span> Missing or invalid API key</p>
-                        <p><span class="response-code error">500 Internal Server Error</span> Server error occurred</p>
+                        <p><span class="response-code success">200 OK</span> All responses return 200 OK (check <code>resultStatusCode</code> in body for actual status)</p>
                     </div>
 
                     <div class="warning-box">
-                        <strong>⚠️ Important Behavior:</strong>
+                        <strong>⚠️ Important Behavior (Zapier Compatible):</strong>
                         <ul style="margin-left: 20px; margin-top: 10px;">
-                            <li>Always returns <code>200 OK</code> for successful checks (even duplicates)</li>
+                            <li><strong>HTTP Status:</strong> Always <code>200 OK</code> for all responses (success, validation error, server error)</li>
+                            <li><strong>Actual Status:</strong> Check the <code>resultStatusCode</code> field in the response body:
+                                <ul style="margin-left: 20px; margin-top: 5px;">
+                                    <li><code>200</code> = Successful check (new or duplicate)</li>
+                                    <li><code>400</code> = Invalid request body or validation error</li>
+                                    <li><code>401</code> = Missing or invalid API key</li>
+                                    <li><code>500</code> = Server error occurred</li>
+                                </ul>
+                            </li>
                             <li>Check <code>isDuplicate</code> field to determine if operation should proceed</li>
                             <li>If <code>isDuplicate</code> is <code>false</code>, proceed with your operation</li>
                             <li>If <code>isDuplicate</code> is <code>true</code>, skip the operation (already processed)</li>
