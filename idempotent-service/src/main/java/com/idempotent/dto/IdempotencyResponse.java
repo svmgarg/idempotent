@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.Map;
 
 @Data
 @Builder
@@ -22,4 +23,9 @@ public class IdempotencyResponse {
     private Instant createdAt;
     private Instant expiresAt;
     private long processingTimeNanos;
+    
+    // For error cases - Zapier compatibility
+    private Integer resultStatusCode;  // HTTP status code (200, 400, 500, etc.)
+    private String message;            // Error message if any
+    private Map<String, String> validationErrors; // Field-specific validation errors
 }

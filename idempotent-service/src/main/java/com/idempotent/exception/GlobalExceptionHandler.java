@@ -1,5 +1,6 @@
 package com.idempotent.exception;
 
+import com.idempotent.dto.IdempotencyResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,7 +9,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,8 +16,12 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * Handles validation exceptions and returns 200 OK with error details
+     * for Zapier compatibility (Zapier treats non-2xx as failures)
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationExceptions(
+    public ResponseEntity<IdempotencyResponse> handleValidationExceptions(
             MethodArgumentNotValidException ex) {
 
         Map<String, String> errors = new HashMap<>();
@@ -27,25 +31,28 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", Instant.now());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "Validation Failed");
-        response.put("details", errors);
+        log.warn("Validation error: {}", errors);
 
-        return ResponseEntity.badRequest().body(response);
+        // Return 200 OK with error details for Zapier compatibility
+        IdempotencyResponse response = IdempotencyResponse.builder()
+                .resultStatusCode(400)
+                .message("Validation Failed")
+                .validationErrors(errors)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
+    public ResponseEntity<IdempotencyResponse> handleRuntimeException(RuntimeException ex) {
         log.error("Unexpected error", ex);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", Instant.now());
-        response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        response.put("error", "Internal Server Error");
-        response.put("message", ex.getMessage());
+        // Return 200 OK with error details for Zapier compatibility
+        IdempotencyResponse response = IdempotencyResponse.builder()
+                .resultStatusCode(500)
+                .message("Internal Server Error")
+                .build();
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        return ResponseEntity.ok(response);
     }
 }

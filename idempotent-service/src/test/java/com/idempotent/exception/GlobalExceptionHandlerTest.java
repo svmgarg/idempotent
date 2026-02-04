@@ -19,49 +19,48 @@ class GlobalExceptionHandlerTest {
     private MockMvc mockMvc;
 
     @Test
-    @DisplayName("Should return 400 with validation errors for invalid request")
+    @DisplayName("Should return 200 OK with resultStatusCode 400 for invalid request (Zapier compatibility)")
     void shouldHandleValidationException() throws Exception {
         String invalidRequest = "{}"; // Missing required idempotencyKey
 
         mockMvc.perform(post("/idempotency/check")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invalidRequest))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.error").value("Validation Failed"))
-                .andExpect(jsonPath("$.details").exists())
-                .andExpect(jsonPath("$.timestamp").exists());
+                .andExpect(status().isOk()) // 200 OK for Zapier compatibility
+                .andExpect(jsonPath("$.resultStatusCode").value(400))
+                .andExpect(jsonPath("$.message").value("Validation Failed"))
+                .andExpect(jsonPath("$.validationErrors").exists());
     }
 
     @Test
-    @DisplayName("Should return 400 with error message for blank idempotency key")
+    @DisplayName("Should return 200 OK with error message for blank idempotency key")
     void shouldHandleBlankIdempotencyKey() throws Exception {
         String invalidRequest = "{\"idempotencyKey\": \"\"}";
 
         mockMvc.perform(post("/idempotency/check")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invalidRequest))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.details.idempotencyKey").exists());
+                .andExpect(status().isOk()) // 200 OK for Zapier compatibility
+                .andExpect(jsonPath("$.resultStatusCode").value(400))
+                .andExpect(jsonPath("$.validationErrors.idempotencyKey").exists());
     }
 
     @Test
-    @DisplayName("Should return 400 for oversized idempotency key")
+    @DisplayName("Should return 200 OK with resultStatusCode 400 for oversized idempotency key")
     void shouldHandleOversizedIdempotencyKey() throws Exception {
-        // Create a key longer than 256 characters
-        String longKey = "x".repeat(257);
+        // Create a key longer than 32 characters
+        String longKey = "x".repeat(33);
         String invalidRequest = "{\"idempotencyKey\": \"" + longKey + "\"}";
 
         mockMvc.perform(post("/idempotency/check")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invalidRequest))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+                .andExpect(status().isOk()) // 200 OK for Zapier compatibility
+                .andExpect(jsonPath("$.resultStatusCode").value(400));
     }
 
     @Test
-    @DisplayName("Should return 400 for oversized client ID")
+    @DisplayName("Should return 200 OK with resultStatusCode 400 for oversized client ID")
     void shouldHandleOversizedClientId() throws Exception {
         String longClientId = "x".repeat(129);
         String invalidRequest = "{\"idempotencyKey\": \"key123\", \"clientId\": \"" + longClientId + "\"}";
@@ -69,19 +68,19 @@ class GlobalExceptionHandlerTest {
         mockMvc.perform(post("/idempotency/check")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invalidRequest))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+                .andExpect(status().isOk()) // 200 OK for Zapier compatibility
+                .andExpect(jsonPath("$.resultStatusCode").value(400));
     }
 
     @Test
-    @DisplayName("Should include timestamp in error response")
+    @DisplayName("Should include message in error response")
     void shouldIncludeTimestampInErrorResponse() throws Exception {
         String invalidRequest = "{}";
 
         mockMvc.perform(post("/idempotency/check")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invalidRequest))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+                .andExpect(status().isOk()) // 200 OK for Zapier compatibility
+                .andExpect(jsonPath("$.message").isNotEmpty());
     }
 }
