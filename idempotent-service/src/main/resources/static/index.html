@@ -309,7 +309,7 @@
     <div class="container">
         <header>
             <h1>🔒 Idempotency Service</h1>
-            <p>Prevent Duplicate Operations with Atomic Check-and-Insert</p>
+            <p>Never Process the Same Operation Twice</p>
             <div class="nav-links">
                 <a href="#overview">Overview</a>
                 <a href="#use-cases">Use Cases</a>
@@ -325,21 +325,28 @@
             <section class="section" id="overview">
                 <h2>📖 Overview</h2>
                 <p class="description">
-                    The Idempotency Service provides a reliable mechanism to prevent duplicate operations in distributed systems.
-                    It uses atomic check-and-insert operations with ConcurrentHashMap (in-memory) or Redis (distributed) to ensure
-                    that duplicate requests with the same idempotency key are detected and rejected.
+                    The Idempotency Service is your safety net against duplicate operations. Whether due to network failures, 
+                    user retries, or system crashes, duplicate requests can wreak havoc on your business. 
+                    This service ensures that critical operations—like payments, orders, and account updates—happen exactly once, 
+                    no matter how many times the request is sent within your configured time window.
                 </p>
                 
                 <div class="info-box">
-                    <strong>Key Features:</strong>
+                    <strong>What You Get:</strong>
                     <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li>✅ Atomic check-and-insert operations</li>
-                        <li>✅ Configurable TTL (Time To Live) for idempotency keys</li>
-                        <li>✅ Automatic cleanup of expired entries</li>
-                        <li>✅ Support for multi-tenant scenarios with client IDs</li>
-                        <li>✅ API Key authentication</li>
-                        <li>✅ In-memory or Redis storage backend</li>
+                        <li>✅ Zero duplicate charges or transactions</li>
+                        <li>✅ Reliable operation execution with automatic retry handling</li>
+                        <li>✅ Configurable memory duration—remember operations for as long as you need (default: 1 hour)</li>
+                        <li>✅ Perfect for payment systems, order processing, and automation workflows</li>
+                        <li>✅ Enterprise-grade security with API Key authentication</li>
+                        <li>✅ Simple integration—just call our API before processing</li>
                     </ul>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⏱️ Important to Know:</strong> We remember processed operations for a configurable time window (TTL). 
+                    After this window expires, the same operation key can be processed again. 
+                    Set your TTL based on your expected retry window—longer for systems with slower retries, shorter for real-time systems.
                 </div>
 
                 <h3>Base URL</h3>
@@ -757,7 +764,7 @@ POST /idempotency/check {"idempotencyKey": "TXN-98765"} → isDuplicate: true �
                                 <td>string</td>
                                 <td><span class="badge required">Required</span></td>
                                 <td>Unique key to identify the operation</td>
-                                <td>1-256 characters</td>
+                                <td>Max 32 characters</td>
                             </tr>
                             <tr>
                                 <td><code>clientId</code></td>
@@ -770,11 +777,20 @@ POST /idempotency/check {"idempotencyKey": "TXN-98765"} → isDuplicate: true �
                                 <td><code>ttlSeconds</code></td>
                                 <td>long</td>
                                 <td><span class="badge optional">Optional</span></td>
-                                <td>Custom TTL in seconds (overrides default)</td>
-                                <td>Positive number</td>
+                                <td>Custom TTL in seconds (overrides default 3600s)</td>
+                                <td>Max 3600 seconds (1 hour)</td>
                             </tr>
                         </tbody>
                     </table>
+
+                    <div class="warning-box">
+                        <strong>⚠️ Validation Rules:</strong>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li><strong>idempotencyKey:</strong> Must be between 1-32 characters. Use meaningful, unique identifiers (Payment ID, Order ID, etc.)</li>
+                            <li><strong>ttlSeconds:</strong> Maximum 3600 seconds (1 hour). Default is 3600s if not specified. This limits how long we remember processed operations.</li>
+                            <li>If you need longer memory windows, contact support for enterprise plans.</li>
+                        </ul>
+                    </div>
 
                     <h3>Request Example</h3>
                     <pre><code>POST http://144.24.119.46:8080/idempotency/check

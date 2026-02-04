@@ -1,5 +1,7 @@
 package com.idempotent.dto;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -14,11 +16,13 @@ import lombok.NoArgsConstructor;
 public class IdempotencyRequest {
 
     @NotBlank(message = "Idempotency key is required")
-    @Size(min = 1, max = 256, message = "Idempotency key must be between 1 and 256 characters")
+    @Size(min = 1, max = 32, message = "Idempotency key must be between 1 and 32 characters")
     private String idempotencyKey;
 
     @Size(max = 128, message = "Client ID must not exceed 128 characters")
     private String clientId;
 
+    @Max(value = 3600, message = "TTL cannot exceed 3600 seconds (1 hour)")
+    @Min(value = 1, message = "TTL must be at least 1 second")
     private Long ttlSeconds;
 }
