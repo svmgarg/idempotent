@@ -352,6 +352,43 @@
                     The <code>/check</code> endpoint requires API Key authentication. Include the API key in the request header.
                 </p>
 
+                <h3>How to Get an API Key</h3>
+                <div class="success-box">
+                    <strong>📧 Request API Key:</strong> To obtain an API key, please send a request email to:
+                    <div style="margin-top: 10px; font-size: 1.1em; font-weight: bold;">
+                        <a href="mailto:svmgarg@gmail.com?subject=API%20Key%20Request%20for%20Idempotency%20Service&body=Hi,%0A%0AI%20would%20like%20to%20request%20an%20API%20key%20for%20the%20Idempotency%20Service.%0A%0AThank%20you">
+                            📮 svmgarg@gmail.com
+                        </a>
+                    </div>
+                    <p style="margin-top: 15px; font-size: 0.95em;">
+                        In your email, please mention:
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>Your name or organization</li>
+                            <li>Use case for the API</li>
+                            <li>Expected request volume</li>
+                        </ul>
+                    </p>
+                </div>
+
+                <h3>API Key Configuration</h3>
+                <p>
+                    The service supports <strong>multiple API keys</strong> configured in <code>apiKey.json</code>.
+                </p>
+                <div class="info-box">
+                    <strong>📝 Configuration Format:</strong>
+                    <pre><code>{
+  "apiKeys": ["key1", "key2", "key3", ...]
+}</code></pre>
+                    <p style="margin-top: 10px;">
+                        The service automatically loads all keys in the array. Any of these keys can be used for authentication.
+                    </p>
+                </div>
+
+                <div class="warning-box" style="background: #f0f0f0; border-left-color: #666;">
+                    <strong>🔒 Security Note:</strong> The <code>apiKey.json</code> file is stored on the server and is not accessible to end users. 
+                    API keys are managed by the service administrator and distributed to authorized clients.
+                </div>
+
                 <h3>Header</h3>
                 <table class="parameter-table">
                     <thead>
@@ -364,11 +401,17 @@
                     <tbody>
                         <tr>
                             <td><code>X-API-KEY</code></td>
-                            <td>Your API key (configured in apiKey.json)</td>
+                            <td>Your assigned API key (provided by administrator)</td>
                             <td><span class="badge required">Required</span></td>
                         </tr>
                     </tbody>
                 </table>
+
+                <div class="info-box">
+                    <strong>✅ Backward Compatibility:</strong> The service also supports the legacy single-key format:
+                    <pre><code>{"apiKey": "singleKey"}</code></pre>
+                    If you're using the old format, it will be automatically recognized.
+                </div>
 
                 <div class="warning-box">
                     <strong>⚠️ Important:</strong> The <code>/health</code> and <code>/ping</code> endpoints do not require authentication.

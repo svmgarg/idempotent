@@ -10,6 +10,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -21,22 +23,37 @@ public class JsonFileApiKeyProvider implements ApiKeyProvider {
     @Value("classpath:apiKey.json")
     private Resource apiKeyResource;
 
-    private String apiKey;
+    private Set<String> validApiKeys = new HashSet<>();
 
     @PostConstruct
     public void loadApiKey() throws IOException {
         try {
             JsonNode root = objectMapper.readTree(apiKeyResource.getInputStream());
-            this.apiKey = root.path("apiKey").asText();
-            log.info("API key loaded from resource");
+            
+            // Support both old single key format and new multiple keys format
+            if (root.has("apiKeys")) {
+                // New format: array of keys
+                JsonNode keysNode = root.path("apiKeys");
+                if (keysNode.isArray()) {
+                    keysNode.forEach(keyNode -> validApiKeys.add(keyNode.asText()));
+                    log.info("Loaded {} API keys from resource", validApiKeys.size());
+                }
+            } else if (root.has("apiKey")) {
+                // Old format: single key (backward compatibility)
+                String singleKey = root.path("apiKey").asText();
+                validApiKeys.add(singleKey);
+                log.info("Loaded 1 API key from resource (legacy format)");
+            } else {
+                log.error("No apiKeys or apiKey field found in configuration");
+            }
         } catch (IOException e) {
-            log.error("Failed to load API key", e);
+            log.error("Failed to load API keys", e);
             throw e;
         }
     }
 
     @Override
     public boolean isValid(String apiKey) {
-        return apiKey != null && apiKey.equals(this.apiKey);
+        return apiKey != null && validApiKeys.contains(apiKey);
     }
 }
