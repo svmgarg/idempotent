@@ -32,15 +32,15 @@ public class SecurityConfig {
             
             .authorizeHttpRequests(authz -> authz
                 // Public endpoints
-                .requestMatchers(HttpMethod.GET, "/idempotency/health").permitAll()
                 .requestMatchers(HttpMethod.GET, "/idempotency/ping").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
                 
                 // Static resources (documentation)
                 .requestMatchers("/", "/index.html", "/*.html", "/*.css", "/*.js").permitAll()
                 
-                // Protected endpoints
+                // Protected endpoints - Require API Key authentication
                 .requestMatchers(HttpMethod.POST, "/idempotency/check").authenticated()
+                .requestMatchers(HttpMethod.GET, "/idempotency/health").authenticated()
                 
                 // All other requests require authentication
                 .anyRequest().authenticated()

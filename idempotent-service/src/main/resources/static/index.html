@@ -518,7 +518,7 @@
                 </table>
 
                 <div class="warning-box">
-                    <strong>⚠️ Important:</strong> The <code>/health</code> and <code>/ping</code> endpoints do not require authentication.
+                    <strong>⚠️ Important:</strong> The <code>/ping</code> endpoint does not require authentication. All other endpoints require API Key authentication.
                 </div>
             </section>
 
@@ -823,7 +823,7 @@ Content-Type: application/json
                     <div class="endpoint-header">
                         <span class="method get">GET</span>
                         <span class="url">/idempotency/health</span>
-                        <span class="auth-badge none">🔓 No Auth</span>
+                        <span class="auth-badge required">🔐 Auth Required</span>
                     </div>
 
                     <div class="description">
@@ -834,7 +834,8 @@ Content-Type: application/json
                         <summary style="cursor: pointer; font-weight: 500; color: #2c3e50;">
                             📝 Request Example
                         </summary>
-                        <pre style="margin-top: 10px;"><code>GET http://144.24.119.46:8080/idempotency/health</code></pre>
+                        <pre style="margin-top: 10px;"><code>GET http://144.24.119.46:8080/idempotency/health
+X-API-KEY: your-api-key-here</code></pre>
                     </details>
 
                     <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">

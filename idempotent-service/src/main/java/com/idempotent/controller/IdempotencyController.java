@@ -53,7 +53,7 @@ public class IdempotencyController {
     }
 
     /**
-     * Health check endpoint - No authentication required.
+     * Health check endpoint - Requires API Key authentication via header: X-API-KEY
      * Returns service health status and basic metrics.
      */
     @GetMapping("/health")
