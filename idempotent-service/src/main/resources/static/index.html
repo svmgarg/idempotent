@@ -337,7 +337,6 @@
                     <ul style="margin-left: 20px; margin-top: 10px;">
                         <li>✅ Detect that a request is a duplicate (same unique ID arriving again)</li>
                         <li>✅ Skip re-executing the operation</li>
-                        <li>✅ Return your previously cached result</li>
                     </ul>
                 </p>
                 
@@ -383,7 +382,7 @@
                 <div class="endpoint" style="border-left-color: #007bff;">
                     <h3 style="color: #007bff; margin-top: 0;">2) 💳 Payment Capture / Payment Processing</h3>
                     <p class="description">
-                        <strong>Scenario:</strong> Payment API is retried due to gateway timeout or network issue.
+                        <strong>Scenario:</strong> Payment API is retried due to double click or client retry for an order.
                     </p>
                     <p class="description">
                         <strong>Without idempotency:</strong> payment can be captured multiple times.
@@ -419,21 +418,8 @@
                     </p>
                 </div>
 
-                <div class="endpoint" style="border-left-color: #20c997;">
-                    <h3 style="color: #20c997; margin-top: 0;">5) ⚙️ Background Jobs / Queue Reprocessing (Kafka / SQS / RabbitMQ)</h3>
-                    <p class="description">
-                        <strong>Scenario:</strong> Consumer crashes after processing but before ack, so the message is delivered again.
-                    </p>
-                    <p class="description">
-                        <strong>Without idempotency:</strong> the same job may run twice (double shipment / double state updates).
-                    </p>
-                    <p class="description">
-                        <strong>With idempotency:</strong> use messageId as key and safely reprocess.
-                    </p>
-                </div>
-
                 <div class="endpoint" style="border-left-color: #6c63ff;">
-                    <h3 style="color: #6c63ff; margin-top: 0;">6) 🧾 Invoice Generation / Document Generation</h3>
+                    <h3 style="color: #6c63ff; margin-top: 0;">5) 🧾 Invoice Generation / Document Generation</h3>
                     <p class="description">
                         <strong>Scenario:</strong> Invoice generation is retried due to failure or retry policy.
                     </p>
@@ -446,7 +432,7 @@
                 </div>
 
                 <div class="endpoint" style="border-left-color: #ff6b6b;">
-                    <h3 style="color: #ff6b6b; margin-top: 0;">7) 📩 Notification / Email / SMS Sending</h3>
+                    <h3 style="color: #ff6b6b; margin-top: 0;">6) 📩 Notification / Email / SMS Sending</h3>
                     <p class="description">
                         <strong>Scenario:</strong> notification send is retried due to network issues.
                     </p>
@@ -459,7 +445,7 @@
                 </div>
 
                 <div class="endpoint" style="border-left-color: #13547a;">
-                    <h3 style="color: #13547a; margin-top: 0;">8) 🤖 Zapier Integration (Automation Safety)</h3>
+                    <h3 style="color: #13547a; margin-top: 0;">7) 🤖 Zapier Integration (Automation Safety)</h3>
                     <p class="description">
                         <strong>Scenario:</strong> Zapier workflows may trigger twice or retry because of network failures / step failures / replay.
                     </p>
@@ -659,13 +645,27 @@ X-API-KEY: your-api-key-here
                         </div>
                     </details>
 
-                    <h3>Response Examples</h3>
+                    <h3>Examples</h3>
                     
                     <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
                         <summary style="cursor: pointer; font-weight: 500; color: #28a745;">
                             ✅ New Key (Proceed with Operation)
                         </summary>
-                        <pre style="margin-top: 10px;"><code>HTTP/1.1 200 OK
+                        <div style="margin-top: 10px;">
+                            <details style="margin: 10px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
+                                <summary style="cursor: pointer; font-weight: 500; color: #333;">📤 Request</summary>
+                                <pre style="margin-top: 10px;"><code>POST /idempotency/check
+Content-Type: application/json
+X-API-Key: your-api-key-here
+
+{
+  "idempotencyKey": "payment-123-abc",
+  "ttlSeconds": 3600
+}</code></pre>
+                            </details>
+                            <details style="margin: 10px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
+                                <summary style="cursor: pointer; font-weight: 500; color: #333;">📥 Response</summary>
+                                <pre style="margin-top: 10px;"><code>HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
@@ -675,13 +675,29 @@ Content-Type: application/json
   "expiresAt": "2026-02-03T17:30:00.123Z",
   "processingTimeNanos": 12500
 }</code></pre>
+                            </details>
+                        </div>
                     </details>
 
                     <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
                         <summary style="cursor: pointer; font-weight: 500; color: #007bff;">
                             ℹ️ Duplicate Key (Skip Operation)
                         </summary>
-                        <pre style="margin-top: 10px;"><code>HTTP/1.1 200 OK
+                        <div style="margin-top: 10px;">
+                            <details style="margin: 10px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
+                                <summary style="cursor: pointer; font-weight: 500; color: #333;">📤 Request</summary>
+                                <pre style="margin-top: 10px;"><code>POST /idempotency/check
+Content-Type: application/json
+X-API-Key: your-api-key-here
+
+{
+  "idempotencyKey": "payment-123-abc",
+  "ttlSeconds": 3600
+}</code></pre>
+                            </details>
+                            <details style="margin: 10px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
+                                <summary style="cursor: pointer; font-weight: 500; color: #333;">📥 Response</summary>
+                                <pre style="margin-top: 10px;"><code>HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
@@ -691,6 +707,8 @@ Content-Type: application/json
   "expiresAt": "2026-02-03T17:30:00.123Z",
   "processingTimeNanos": 8200
 }</code></pre>
+                            </details>
+                        </div>
                     </details>
 
                     <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
@@ -698,16 +716,19 @@ Content-Type: application/json
                             ❌ Invalid Idempotency Key (Exceeds 64 chars)
                         </summary>
                         <div style="margin-top: 10px;">
-                            <p style="margin: 10px 0; font-size: 0.9em; color: #666;">Request:</p>
-                            <pre><code>POST /idempotency/check
+                            <details style="margin: 10px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
+                                <summary style="cursor: pointer; font-weight: 500; color: #333;">📤 Request</summary>
+                                <pre style="margin-top: 10px;"><code>POST /idempotency/check
 Content-Type: application/json
 
 {
   "idempotencyKey": "this-is-a-very-long-key-that-exceeds-the-maximum-allowed-length-of-64-characters-xyz",
   "ttlSeconds": 3600
 }</code></pre>
-                            <p style="margin: 10px 0; font-size: 0.9em; color: #666;">Response:</p>
-                            <pre><code>HTTP/1.1 200 OK
+                            </details>
+                            <details style="margin: 10px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
+                                <summary style="cursor: pointer; font-weight: 500; color: #333;">📥 Response</summary>
+                                <pre style="margin-top: 10px;"><code>HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
@@ -717,6 +738,7 @@ Content-Type: application/json
     "idempotencyKey": "Idempotency key must be between 1 and 64 characters"
   }
 }</code></pre>
+                            </details>
                         </div>
                     </details>
 
@@ -725,16 +747,19 @@ Content-Type: application/json
                             ❌ TTL Exceeds Maximum (3600 seconds)
                         </summary>
                         <div style="margin-top: 10px;">
-                            <p style="margin: 10px 0; font-size: 0.9em; color: #666;">Request:</p>
-                            <pre><code>POST /idempotency/check
+                            <details style="margin: 10px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
+                                <summary style="cursor: pointer; font-weight: 500; color: #333;">📤 Request</summary>
+                                <pre style="margin-top: 10px;"><code>POST /idempotency/check
 Content-Type: application/json
 
 {
   "idempotencyKey": "payment-123",
   "ttlSeconds": 7200
 }</code></pre>
-                            <p style="margin: 10px 0; font-size: 0.9em; color: #666;">Response:</p>
-                            <pre><code>HTTP/1.1 200 OK
+                            </details>
+                            <details style="margin: 10px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
+                                <summary style="cursor: pointer; font-weight: 500; color: #333;">📥 Response</summary>
+                                <pre style="margin-top: 10px;"><code>HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
@@ -744,6 +769,7 @@ Content-Type: application/json
     "ttlSeconds": "TTL cannot exceed 3600 seconds (1 hour)"
   }
 }</code></pre>
+                            </details>
                         </div>
                     </details>
 
@@ -752,15 +778,18 @@ Content-Type: application/json
                             ❌ Missing Required Idempotency Key
                         </summary>
                         <div style="margin-top: 10px;">
-                            <p style="margin: 10px 0; font-size: 0.9em; color: #666;">Request:</p>
-                            <pre><code>POST /idempotency/check
+                            <details style="margin: 10px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
+                                <summary style="cursor: pointer; font-weight: 500; color: #333;">📤 Request</summary>
+                                <pre style="margin-top: 10px;"><code>POST /idempotency/check
 Content-Type: application/json
 
 {
   "ttlSeconds": 3600
 }</code></pre>
-                            <p style="margin: 10px 0; font-size: 0.9em; color: #666;">Response:</p>
-                            <pre><code>HTTP/1.1 200 OK
+                            </details>
+                            <details style="margin: 10px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
+                                <summary style="cursor: pointer; font-weight: 500; color: #333;">📥 Response</summary>
+                                <pre style="margin-top: 10px;"><code>HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
@@ -770,6 +799,7 @@ Content-Type: application/json
     "idempotencyKey": "Idempotency key is required"
   }
 }</code></pre>
+                            </details>
                         </div>
                     </details>
 
