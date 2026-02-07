@@ -189,9 +189,9 @@ function Verify-Deployment {
         Write-Log "Health check attempt $attempt/$maxAttempts..." -Color $InfoColor
         
         try {
-            # Ignore SSL certificate validation for self-signed certificates
-            $response = Invoke-WebRequest -Uri $healthUrl -TimeoutSec 5 -SkipCertificateCheck -ErrorAction Stop
-            if ($response.StatusCode -eq 200) {
+            # Test via SSH curl command with -k flag to ignore self-signed cert
+            $curlResult = ssh $RemoteServer "curl -s -k -o /dev/null -w '%{http_code}' https://localhost:${ServerPort}/idempotency/ping" 2>&1
+            if ($curlResult -eq "200") {
                 Write-Log "✓ Service is healthy and responding" -Color $SuccessColor
                 Write-Log "  Endpoint: $healthUrl" -Color $SuccessColor
                 return $true
@@ -200,6 +200,7 @@ function Verify-Deployment {
         catch {
             Start-Sleep -Seconds 2
         }
+        Start-Sleep -Seconds 2
     }
     
     Write-Log "✗ Service health check failed after $maxAttempts attempts" -Color $ErrorColor
