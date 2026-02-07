@@ -35,6 +35,61 @@ body {
     margin: 0 auto;
 }
 
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.sidebar-collapse-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+}
+
+.sidebar-collapse-btn:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.sidebar-collapse-btn span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: white;
+    border-radius: 1px;
+    transition: all 0.3s ease;
+}
+
+.sidebar-collapse-btn.collapsed span:nth-child(1) {
+    transform: rotate(-45deg) translate(-5px, 6px);
+}
+
+.sidebar-collapse-btn.collapsed span:nth-child(2) {
+    opacity: 0;
+}
+
+.sidebar-collapse-btn.collapsed span:nth-child(3) {
+    transform: rotate(45deg) translate(-5px, -6px);
+}
+
+@media (min-width: 992px) {
+    .sidebar-collapse-btn {
+        display: flex !important;
+    }
+}
+
 .logo {
     color: white;
     text-decoration: none;
@@ -62,6 +117,7 @@ body {
     padding: 2rem 1.5rem;
     z-index: 998;
     box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+    transition: width 0.3s ease, padding 0.3s ease;
 }
 
 .sidebar-nav {
@@ -110,12 +166,64 @@ body {
     font-weight: 600;
 }
 
-/* Main Content */
+/* Collapsed Sidebar State */
+.sidebar.collapsed {
+    width: 80px;
+    padding: 1rem 0.5rem;
+}
+
+.sidebar.collapsed .nav-section-title {
+    display: none;
+}
+
+.sidebar.collapsed .nav-list {
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.sidebar.collapsed .nav-link-sidebar {
+    padding: 0.75rem;
+    text-align: center;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+    width: 100%;
+    position: relative;
+}
+
+/* Tooltip on hover for collapsed sidebar */
+.sidebar.collapsed .nav-link-sidebar:hover::after {
+    content: attr(data-label);
+    position: absolute;
+    left: 90px;
+    top: 0;
+    background: #333;
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.sidebar.collapsed .nav-link-sidebar::before {
+    content: '';
+    display: block;
+}
+
+/* Main content adjustment for collapsed sidebar */
 .main-content {
     margin-left: 280px;
     margin-top: 70px;
     padding: 2rem;
     min-height: calc(100vh - 70px);
+    transition: margin-left 0.3s ease;
+}
+
+.main-content.sidebar-collapsed {
+    margin-left: 80px;
 }
 
 /* Page Header */
@@ -264,6 +372,11 @@ footer {
     font-size: 0.9rem;
     margin-top: 3rem;
     margin-left: 280px;
+    transition: margin-left 0.3s ease;
+}
+
+footer.sidebar-collapsed {
+    margin-left: 80px;
 }
 
 footer a {

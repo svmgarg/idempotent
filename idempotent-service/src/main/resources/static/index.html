@@ -12,7 +12,14 @@
     <!-- Top Header -->
     <header class="top-header">
         <div class="header-content">
-            <a class="logo" href="#">🔒 Idempotency Service</a>
+            <div class="header-left">
+                <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Toggle Sidebar">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <a class="logo" href="#">🔒 Idempotency Service</a>
+            </div>
             <button class="sidebar-toggle d-lg-none" id="sidebarToggle">
                 <span></span>
                 <span></span>
@@ -26,23 +33,23 @@
         <nav class="sidebar-nav">
             <h5 class="nav-section-title">Documentation</h5>
             <ul class="nav-list">
-                <li><a href="#overview" class="nav-link-sidebar">📖 Overview</a></li>
-                <li><a href="#quickstart" class="nav-link-sidebar">⚡ Quick Start</a></li>
-                <li><a href="#use-cases" class="nav-link-sidebar">✅ Use Cases</a></li>
+                <li><a href="#overview" class="nav-link-sidebar" data-label="Overview">📖 Overview</a></li>
+                <li><a href="#quickstart" class="nav-link-sidebar" data-label="Quick Start">⚡ Quick Start</a></li>
+                <li><a href="#use-cases" class="nav-link-sidebar" data-label="Use Cases">✅ Use Cases</a></li>
             </ul>
 
             <h5 class="nav-section-title">Integration</h5>
             <ul class="nav-list">
-                <li><a href="#authentication" class="nav-link-sidebar">🔐 Authentication</a></li>
-                <li><a href="#check-api" class="nav-link-sidebar">🔍 Check API</a></li>
-                <li><a href="#health-api" class="nav-link-sidebar">❤️ Health API</a></li>
+                <li><a href="#authentication" class="nav-link-sidebar" data-label="Authentication">🔐 Authentication</a></li>
+                <li><a href="#check-api" class="nav-link-sidebar" data-label="Check API">🔍 Check API</a></li>
+                <li><a href="#health-api" class="nav-link-sidebar" data-label="Health API">❤️ Health API</a></li>
             </ul>
 
             <h5 class="nav-section-title">Resources</h5>
             <ul class="nav-list">
-                <li><a href="#examples" class="nav-link-sidebar">💡 Examples</a></li>
-                <li><a href="#tester" class="nav-link-sidebar">🧪 API Tester</a></li>
-                <li><a href="#faq" class="nav-link-sidebar">❓ FAQ</a></li>
+                <li><a href="#examples" class="nav-link-sidebar" data-label="Examples">💡 Examples</a></li>
+                <li><a href="#tester" class="nav-link-sidebar" data-label="API Tester">🧪 API Tester</a></li>
+                <li><a href="#faq" class="nav-link-sidebar" data-label="FAQ">❓ FAQ</a></li>
             </ul>
         </nav>
     </aside>
@@ -627,6 +634,30 @@ const key = `${userId}-${orderId}`;                 // User + order combo</code>
 
         // Show overview by default
         showPage('overview');
+
+        // Sidebar collapse/expand functionality
+        const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.querySelector('.main-content');
+        const footer = document.querySelector('footer');
+
+        // Check if sidebar was previously collapsed (localStorage)
+        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+            sidebar.classList.add('collapsed');
+            mainContent.classList.add('sidebar-collapsed');
+            footer.classList.add('sidebar-collapsed');
+            sidebarCollapseBtn.classList.add('collapsed');
+        }
+
+        sidebarCollapseBtn.addEventListener('click', function() {
+            const isCollapsed = sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('sidebar-collapsed');
+            footer.classList.toggle('sidebar-collapsed');
+            sidebarCollapseBtn.classList.toggle('collapsed');
+            
+            // Save state
+            localStorage.setItem('sidebarCollapsed', isCollapsed);
+        });
 
         // Sidebar toggle for mobile
         document.getElementById('sidebarToggle').addEventListener('click', function() {
