@@ -9,29 +9,46 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-        <div class="container-fluid px-4">
-            <a class="navbar-brand" href="#">🔒 Idempotency Service</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+    <!-- Top Header -->
+    <header class="top-header">
+        <div class="header-content">
+            <a class="logo" href="#">🔒 Idempotency Service</a>
+            <button class="sidebar-toggle d-lg-none" id="sidebarToggle">
+                <span></span>
+                <span></span>
+                <span></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="#overview">Overview</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#quickstart">Quick Start</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#use-cases">Use Cases</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#authentication">Authentication</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#check-api">Check API</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#tester">API Tester</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
-                </ul>
-            </div>
         </div>
-    </nav>
+    </header>
 
-    <!-- Main Container -->
-    <div class="container-main">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+            <h5 class="nav-section-title">Documentation</h5>
+            <ul class="nav-list">
+                <li><a href="#overview" class="nav-link-sidebar">📖 Overview</a></li>
+                <li><a href="#quickstart" class="nav-link-sidebar">⚡ Quick Start</a></li>
+                <li><a href="#use-cases" class="nav-link-sidebar">✅ Use Cases</a></li>
+            </ul>
+
+            <h5 class="nav-section-title">Integration</h5>
+            <ul class="nav-list">
+                <li><a href="#authentication" class="nav-link-sidebar">🔐 Authentication</a></li>
+                <li><a href="#check-api" class="nav-link-sidebar">🔍 Check API</a></li>
+                <li><a href="#health-api" class="nav-link-sidebar">❤️ Health API</a></li>
+            </ul>
+
+            <h5 class="nav-section-title">Resources</h5>
+            <ul class="nav-list">
+                <li><a href="#examples" class="nav-link-sidebar">💡 Examples</a></li>
+                <li><a href="#tester" class="nav-link-sidebar">🧪 API Tester</a></li>
+                <li><a href="#faq" class="nav-link-sidebar">❓ FAQ</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
         <!-- Hero Section -->
         <div class="hero">
             <h1>🔒 Idempotency Service</h1>
@@ -439,6 +456,7 @@ const key = `${userId}-${orderId}`;                 // User + order combo</code>
             </section>
         </div>
     </div>
+    </main>
 
     <!-- Footer -->
     <footer>
@@ -563,10 +581,24 @@ const key = `${userId}-${orderId}`;                 // User + order combo</code>
                 }
             });
 
-            document.querySelectorAll('.nav-link').forEach(link => {
+            document.querySelectorAll('.nav-link-sidebar').forEach(link => {
                 link.classList.remove('active');
                 if (link.getAttribute('href') === `#${current}`) {
                     link.classList.add('active');
+                }
+            });
+        });
+
+        // Sidebar toggle for mobile
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+
+        // Close sidebar when clicking on a link (mobile)
+        document.querySelectorAll('.nav-link-sidebar').forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth < 992) {
+                    document.getElementById('sidebar').classList.remove('active');
                 }
             });
         });
