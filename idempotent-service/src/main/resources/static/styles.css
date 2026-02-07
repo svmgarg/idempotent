@@ -143,6 +143,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    width: 100%;
 }
 
 .nav-link-sidebar {
@@ -153,6 +154,10 @@ body {
     border-radius: 6px;
     transition: all 0.2s ease;
     border-left: 3px solid transparent;
+    word-break: break-word;
+    white-space: normal;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .nav-link-sidebar:hover {
@@ -224,6 +229,18 @@ body {
     background: #e7f3ff;
     color: var(--primary) !important;
     border-left-color: var(--primary);
+}
+
+/* Expanded Sidebar State */
+.sidebar .nav-list {
+    width: 100%;
+}
+
+.sidebar .nav-link-sidebar {
+    width: 100%;
+    box-sizing: border-box;
+    display: block;
+    text-align: left;
 }
 
 /* Tooltip on hover for collapsed sidebar */
