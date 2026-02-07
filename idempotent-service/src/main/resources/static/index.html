@@ -49,16 +49,16 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        <!-- Hero Section -->
-        <div class="hero">
-            <h1>🔒 Idempotency Service</h1>
-            <p>Never Process the Same Operation Twice</p>
+        <!-- Hero/Title Bar (Always visible) -->
+        <div class="page-header">
+            <h1 id="pageTitle">🔒 Idempotency Service</h1>
+            <p id="pageSubtitle">Never Process the Same Operation Twice</p>
         </div>
 
-        <!-- Content -->
+        <!-- Content Area (SPA - One section at a time) -->
         <div class="content-area">
             <!-- Overview Section -->
-            <section class="section" id="overview">
+            <section class="page" data-page="overview">
                 <h2>📖 Overview</h2>
                 <p>The Idempotency Service is your safety net against duplicate triggers.</p>
                 <p>In distributed systems, the same request can arrive multiple times due to network failures, user retries, automation tool retries, or client-side issues. Without idempotency, this means the same operation gets executed multiple times—resulting in duplicate charges, double-booked seats, duplicate orders, or duplicate notifications.</p>
@@ -78,7 +78,7 @@
             </section>
 
             <!-- Quick Start Section -->
-            <section class="section" id="quickstart">
+            <section class="page" data-page="quickstart">
                 <h2>⚡ Quick Start (2 Minutes)</h2>
                 <p>Get up and running with the Idempotency Service in just a few steps:</p>
 
@@ -110,7 +110,7 @@
                     <li>If <code>isDuplicate: true</code> → return cached result</li>
                 </ol>
             </section>
-            <section class="section" id="use-cases">
+            <section class="page" data-page="use-cases">
                 <h2>✅ Real-World Scenarios</h2>
                 <p>Here are common situations where duplicate triggers occur:</p>
 
@@ -136,7 +136,7 @@
             </section>
 
             <!-- Authentication Section -->
-            <section class="section" id="authentication">
+            <section class="page" data-page="authentication">
                 <h2>🔐 Authentication</h2>
                 <p>The <code>/check</code> endpoint requires API Key authentication.</p>
 
@@ -166,7 +166,7 @@
             </section>
 
             <!-- Check API Section -->
-            <section class="section" id="check-api">
+            <section class="page" data-page="check-api">
                 <h2>🔍 Check API</h2>
 
                 <div class="endpoint">
@@ -227,7 +227,7 @@ X-API-KEY: your-api-key-here
             </section>
 
             <!-- Health API Section -->
-            <section class="section" id="health-api">
+            <section class="page" data-page="health-api">
                 <h2>❤️ Health & Monitoring</h2>
 
                 <div class="endpoint">
@@ -248,7 +248,7 @@ X-API-KEY: your-api-key-here
             </section>
 
             <!-- Examples Section -->
-            <section class="section" id="examples">
+            <section class="page" data-page="examples">
                 <h2>💡 Code Examples</h2>
 
                 <h3>cURL</h3>
@@ -307,7 +307,7 @@ else:
             </section>
 
             <!-- API Tester Section -->
-            <section class="section" id="tester">
+            <section class="page" data-page="tester">
                 <h2>🧪 Interactive API Tester</h2>
                 <p>Test the Idempotency Check API directly below:</p>
 
@@ -347,7 +347,7 @@ else:
             </section>
 
             <!-- FAQ Section -->
-            <section class="section" id="faq">
+            <section class="page" data-page="faq">
                 <h2>❓ Frequently Asked Questions</h2>
 
                 <div class="accordion" id="faqAccordion">
@@ -571,36 +571,66 @@ const key = `${userId}-${orderId}`;                 // User + order combo</code>
             });
         });
 
-        // Active nav link on scroll
-        window.addEventListener('scroll', () => {
-            let current = '';
-            document.querySelectorAll('.section').forEach(section => {
-                const sectionTop = section.offsetTop;
-                if (pageYOffset >= sectionTop - 100) {
-                    current = section.getAttribute('id');
-                }
-            });
-
-            document.querySelectorAll('.nav-link-sidebar').forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href') === `#${current}`) {
-                    link.classList.add('active');
-                }
-            });
-        });
-
-        // Sidebar toggle for mobile
-        document.getElementById('sidebarToggle').addEventListener('click', function() {
-            document.getElementById('sidebar').classList.toggle('active');
-        });
-
-        // Close sidebar when clicking on a link (mobile)
+        // SPA Page Navigation
         document.querySelectorAll('.nav-link-sidebar').forEach(link => {
-            link.addEventListener('click', function() {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const pageId = this.getAttribute('href').substring(1);
+                showPage(pageId);
+                
+                // Close sidebar on mobile
                 if (window.innerWidth < 992) {
                     document.getElementById('sidebar').classList.remove('active');
                 }
             });
+        });
+
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            const activePage = document.querySelector(`[data-page="${pageId}"]`);
+            if (activePage) {
+                activePage.classList.add('active');
+                
+                // Update page title
+                const titleMap = {
+                    'overview': '📖 Overview',
+                    'quickstart': '⚡ Quick Start',
+                    'use-cases': '✅ Use Cases',
+                    'authentication': '🔐 Authentication',
+                    'check-api': '🔍 Check API',
+                    'health-api': '❤️ Health API',
+                    'examples': '💡 Code Examples',
+                    'tester': '🧪 API Tester',
+                    'faq': '❓ FAQ'
+                };
+                
+                document.getElementById('pageTitle').textContent = titleMap[pageId] || 'Idempotency Service';
+                document.getElementById('pageSubtitle').textContent = 'Never Process the Same Operation Twice';
+            }
+            
+            // Update active nav link
+            document.querySelectorAll('.nav-link-sidebar').forEach(navLink => {
+                navLink.classList.remove('active');
+                if (navLink.getAttribute('href') === `#${pageId}`) {
+                    navLink.classList.add('active');
+                }
+            });
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        // Show overview by default
+        showPage('overview');
+
+        // Sidebar toggle for mobile
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
         });
 
         // Allow Enter key to trigger test
