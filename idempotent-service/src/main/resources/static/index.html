@@ -7,277 +7,210 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🔒</text></svg>">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             min-height: 100vh;
+            padding-top: 70px;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+        .navbar {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.85) !important;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: white !important;
+        }
+
+        .container-main {
             background: white;
             border-radius: 12px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            overflow: hidden;
+            margin-bottom: 40px;
         }
 
-        header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
             padding: 60px 40px;
             text-align: center;
-            position: relative;
-            overflow: hidden;
+            border-radius: 12px 12px 0 0;
         }
 
-        header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -10%;
-            width: 300px;
-            height: 300px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-        }
-
-        header h1 {
-            font-size: 2.8rem;
-            margin-bottom: 10px;
-            position: relative;
-            z-index: 1;
+        .hero h1 {
+            font-size: 2.5rem;
             font-weight: 700;
+            margin-bottom: 1rem;
         }
 
-        header p {
-            font-size: 1.2rem;
+        .hero p {
+            font-size: 1.1rem;
             opacity: 0.95;
-            position: relative;
-            z-index: 1;
         }
 
-        .nav-links {
-            display: none;
+        .content-area {
+            padding: 40px;
         }
 
-        /* Sidebar Navigation */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 250px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-            overflow-y: auto;
-            transition: transform 0.3s ease;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
+        .section h2 {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 2rem;
+            margin-top: 2rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid var(--primary);
         }
 
-        .sidebar.collapsed {
-            transform: translateX(-250px);
-        }
-
-        .sidebar.show {
-            transform: translateX(0);
-        }
-
-        .sidebar-header {
-            color: white;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .sidebar-header h2 {
+        .section h3 {
+            color: var(--secondary);
+            font-weight: 600;
             font-size: 1.3rem;
-            margin-bottom: 5px;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
         }
 
-        .sidebar-header p {
-            font-size: 0.85rem;
-            opacity: 0.9;
-        }
-
-        .sidebar-nav {
-            list-style: none;
-            flex-grow: 1;
-        }
-
-        .sidebar-nav li {
-            margin-bottom: 8px;
-        }
-
-        .sidebar-close {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 10px 15px;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            margin-top: auto;
-            width: 100%;
-        }
-
-        .sidebar-close:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .sidebar-close:active {
-            transform: scale(0.98);
-        }
-
-        .sidebar-nav a {
-            display: block;
-            color: white;
-            text-decoration: none;
-            padding: 12px 15px;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
-            border-left: 3px solid transparent;
-        }
-
-        .sidebar-nav a:hover {
-            background: rgba(255, 255, 255, 0.2);
-            padding-left: 18px;
-        }
-
-        .sidebar-nav a.active {
-            background: rgba(255, 255, 255, 0.3);
-            font-weight: 600;
-            border-left: 3px solid white;
-            padding-left: 12px;
-        }
-
-        .toggle-sidebar {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            color: white;
+        .endpoint {
+            background: #f8f9fa;
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
             border-radius: 4px;
-            cursor: pointer;
-            font-size: 1.2rem;
-            z-index: 1001;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        .toggle-sidebar:hover {
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        .method {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 3px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
         }
 
-        .container {
-            margin-left: 250px;
-            transition: margin-left 0.3s ease;
+        .method.post {
+            background: #28a745;
+            color: white;
         }
 
-        .container.sidebar-collapsed {
-            margin-left: 0;
+        .method.get {
+            background: #007bff;
+            color: white;
         }
 
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
 
-            header h1 {
-                font-size: 1.8rem;
-            }
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
 
-            .content {
-                padding: 20px;
-            }
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
 
-            .endpoint-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1.5rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
 
-            .auth-badge {
-                margin-left: 0;
-            }
+        .table th {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
 
-            .sidebar {
-                width: 200px;
-            }
+        footer {
+            background: #2d2d2d;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            font-size: 0.9rem;
+            margin-top: 3rem;
+        }
 
-            .container {
-                margin-left: 0;
-            }
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
 
-            .toggle-sidebar {
-                display: flex;
-            }
+        footer a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <button class="toggle-sidebar" id="toggleBtn" title="Toggle Navigation">☰</button>
-    
-    <nav class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h2>🔒 Idempotency</h2>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="#">🔒 Idempotency Service</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#overview">Overview</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#use-cases">Use Cases</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#authentication">Authentication</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#check-api">Check API</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#health-api">Health API</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#examples">Examples</a></li>
+                </ul>
+            </div>
         </div>
-        <ul class="sidebar-nav">
-            <li><a href="#overview" class="nav-link active">📖 Overview</a></li>
-            <li><a href="#use-cases" class="nav-link">✅ Use Cases</a></li>
-            <li><a href="#authentication" class="nav-link">🔐 Authentication</a></li>
-            <li><a href="#check-api" class="nav-link">🔍 Check API</a></li>
-            <li><a href="#health-api" class="nav-link">❤️ Health API</a></li>
-            <li><a href="#examples" class="nav-link">💡 Examples</a></li>
-        </ul>
-        <button class="sidebar-close" id="sidebarCloseBtn">← Close</button>
     </nav>
 
-    <div class="container" id="container">
-        <header>
+    <!-- Main Container -->
+    <div class="container-main">
+        <!-- Hero Section -->
+        <div class="hero">
             <h1>🔒 Idempotency Service</h1>
             <p>Never Process the Same Operation Twice</p>
-        </header>
+        </div>
 
-        <div class="content">
+        <!-- Content -->
+        <div class="content-area">
             <!-- Overview Section -->
             <section class="section" id="overview">
                 <h2>📖 Overview</h2>
-                <p class="description" style="font-size: 1.05em; line-height: 1.8; color: #2c3e50;">
-                    <strong style="font-size: 1.15em;">The Idempotency Service is your safety net against duplicate triggers.</strong> 
-                </p>
-                <p class="description">
-                    In distributed systems, the same request can arrive multiple times due to network failures, user retries, automation tool retries, or client-side issues. 
-                    Without idempotency, this means the same operation gets executed multiple times—resulting in duplicate charges, double-booked seats, duplicate orders, or duplicate notifications.
-                </p>
-                <p class="description">
-                    This service <strong>identifies when the same request is sent twice</strong> (detects duplicate triggers) so your application can:
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li>✅ Detect that a request is a duplicate (same unique ID arriving again)</li>
-                        <li>✅ Skip re-executing the operation</li>
-                    </ul>
-                </p>
+                <p>The Idempotency Service is your safety net against duplicate triggers.</p>
+                <p>In distributed systems, the same request can arrive multiple times due to network failures, user retries, automation tool retries, or client-side issues. Without idempotency, this means the same operation gets executed multiple times—resulting in duplicate charges, double-booked seats, duplicate orders, or duplicate notifications.</p>
                 
                 <div class="info-box">
                     <strong>How It Works:</strong>
-                    <ol style="margin-left: 20px; margin-top: 10px; line-height: 1.8;">
+                    <ol style="margin-top: 10px;">
                         <li><strong>First Request:</strong> Your app calls <code>/check</code> with a unique ID → Returns <code>isDuplicate: false</code></li>
                         <li><strong>Process:</strong> Your app executes the operation (payment, order, etc.) and caches the result</li>
                         <li><strong>Duplicate Request:</strong> Same ID arrives again → Calls <code>/check</code> → Returns <code>isDuplicate: true</code></li>
@@ -285,175 +218,63 @@
                     </ol>
                 </div>
 
-                <div class="warning-box">
-                    <strong>⏱️ Memory Window:</strong> We track operation IDs for a configurable time period (default: 1 hour). 
-                    After this window expires, we forget the ID and treat new requests with that ID as new operations.
-                </div>
-
                 <h3>Base URL</h3>
-                <pre><code>http://144.24.119.46:8080/idempotency</code></pre>
+                <pre><code>http://144.24.119.46/api/idempotency</code></pre>
             </section>
 
             <!-- Use Cases Section -->
             <section class="section" id="use-cases">
                 <h2>✅ Real-World Scenarios</h2>
-                <p class="description">
-                    Here are common situations where duplicate triggers occur and how this service helps:
-                </p>
+                <p>Here are common situations where duplicate triggers occur:</p>
 
-                <div class="endpoint" style="border-left-color: #28a745;">
-                    <h3 style="color: #28a745; margin-top: 0;">1) 🛒 Order Creation (Most Common)</h3>
-                    <p class="description">
-                        <strong>Scenario:</strong> A user clicks "Place Order" twice or the client retries due to a timeout.
-                    </p>
-                    <p class="description">
-                        <strong>Without idempotency:</strong> two orders can be created, customer may be charged twice.
-                    </p>
-                    <p class="description">
-                        <strong>With idempotency:</strong> only the first request is processed and all retries return the same response.
-                    </p>
+                <div class="endpoint">
+                    <h3 style="margin-top: 0;">🛒 Order Creation (Most Common)</h3>
+                    <p>User clicks "Place Order" twice → Only one order is created</p>
                 </div>
 
-                <div class="endpoint" style="border-left-color: #007bff;">
-                    <h3 style="color: #007bff; margin-top: 0;">2) 💳 Payment Capture / Payment Processing</h3>
-                    <p class="description">
-                        <strong>Scenario:</strong> Payment API is retried due to double click or client retry for an order.
-                    </p>
-                    <p class="description">
-                        <strong>Without idempotency:</strong> payment can be captured multiple times.
-                    </p>
-                    <p class="description">
-                        <strong>With idempotency:</strong> payment is executed only once and retries return the original payment result.
-                    </p>
+                <div class="endpoint">
+                    <h3 style="margin-top: 0;">💳 Payment Processing</h3>
+                    <p>Payment API is retried due to double click → Payment executed only once</p>
                 </div>
 
-                <div class="endpoint" style="border-left-color: #e83e8c;">
-                    <h3 style="color: #e83e8c; margin-top: 0;">3) 📦 Inventory Reservation / Stock Deduction</h3>
-                    <p class="description">
-                        <strong>Scenario:</strong> Inventory reserve/deduct call is retried due to application crash or client retry.
-                    </p>
-                    <p class="description">
-                        <strong>Without idempotency:</strong> stock may be reduced multiple times causing incorrect inventory.
-                    </p>
-                    <p class="description">
-                        <strong>With idempotency:</strong> stock is deducted only once.
-                    </p>
+                <div class="endpoint">
+                    <h3 style="margin-top: 0;">📦 Inventory Deduction</h3>
+                    <p>Inventory call is retried → Stock deducted only once</p>
                 </div>
 
-                <div class="endpoint" style="border-left-color: #fd7e14;">
-                    <h3 style="color: #fd7e14; margin-top: 0;">4) 🔔 Webhook Processing (Stripe / Razorpay / PayPal / Zapier)</h3>
-                    <p class="description">
-                        <strong>Scenario:</strong> Webhook providers retry the same webhook event multiple times.
-                    </p>
-                    <p class="description">
-                        <strong>Without idempotency:</strong> duplicate invoice generation / duplicate order update / duplicate notifications.
-                    </p>
-                    <p class="description">
-                        <strong>With idempotency:</strong> use webhook eventId as key and process each event exactly once.
-                    </p>
+                <div class="endpoint">
+                    <h3 style="margin-top: 0;">🔔 Webhook Processing</h3>
+                    <p>Webhook providers retry events → Each event processed exactly once</p>
                 </div>
+            </section>
 
-                <div class="endpoint" style="border-left-color: #6c63ff;">
-                    <h3 style="color: #6c63ff; margin-top: 0;">5) 🧾 Invoice Generation / Document Generation</h3>
-                    <p class="description">
-                        <strong>Scenario:</strong> Invoice generation is retried due to failure or retry policy.
-                    </p>
-                    <p class="description">
-                        <strong>Without idempotency:</strong> multiple invoices can be created for the same order.
-                    </p>
-                    <p class="description">
-                        <strong>With idempotency:</strong> invoice is generated only once.
-                    </p>
-                </div>
-
-                <div class="endpoint" style="border-left-color: #ff6b6b;">
-                    <h3 style="color: #ff6b6b; margin-top: 0;">6) 📩 Notification / Email / SMS Sending</h3>
-                    <p class="description">
-                        <strong>Scenario:</strong> notification send is retried due to network issues.
-                    </p>
-                    <p class="description">
-                        <strong>Without idempotency:</strong> user receives duplicate emails/SMS.
-                    </p>
-                    <p class="description">
-                        <strong>With idempotency:</strong> only one notification is sent per unique key.
-                    </p>
-                </div>
-
-                <div class="endpoint" style="border-left-color: #13547a;">
-                    <h3 style="color: #13547a; margin-top: 0;">7) 🤖 Zapier Integration (Automation Safety)</h3>
-                    <p class="description">
-                        <strong>Scenario:</strong> Zapier workflows may trigger twice or retry because of network failures / step failures / replay.
-                    </p>
-                    <p class="description">
-                        <strong>Without idempotency:</strong> duplicate CRM updates, duplicate Slack messages, duplicate payments.
-                    </p>
-                    <p class="description">
-                        <strong>With idempotency:</strong> Zapier sends a stable idempotency key and your service blocks duplicate execution.
-                    </p>
-                </div>
-
-                <div class="info-box">
-                    <strong>💡 Key Insight:</strong> This service <strong>identifies duplicate requests</strong> by tracking unique keys. 
-                    When the same key arrives multiple times, it returns <code>isDuplicate: true</code>. 
-                    Your application must use this signal to skip operations and return cached results, 
-                    ensuring that the same operation is never executed twice.
-                </div>
-
-                <div class="warning-box">
-                    <strong>⚠️ Best Practices:</strong>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li><strong>Use stable IDs:</strong> Always use existing, immutable identifiers (Payment ID, Order ID, Event ID, Message ID) as keys</li>
-                        <li><strong>Check before execution:</strong> Call <code>/check</code> with your unique key BEFORE executing any operation</li>
-                        <li><strong>Cache on success:</strong> After successful first execution, cache the response locally</li>
-                        <li><strong>Return cached on duplicate:</strong> When <code>isDuplicate: true</code> is returned, immediately return your cached result without re-executing</li>
-                        <li><strong>Set appropriate TTL:</strong> Configure <code>ttlSeconds</code> based on your expected retry window (default: 3600 seconds / 1 hour)</li>
-                    </ul>
-                </div>
-            </section>            <!-- Authentication Section -->
+            <!-- Authentication Section -->
             <section class="section" id="authentication">
                 <h2>🔐 Authentication</h2>
-                <p class="description">
-                    The <code>/check</code> endpoint requires API Key authentication. Include the API key in the request header.
-                </p>
-
-                <h3>How to Get an API Key</h3>
-                <div class="success-box">
-                    <strong>📧 Request API Key:</strong> To obtain an API key, please send a request email to:
-                    <div style="margin-top: 10px; font-size: 1.1em; font-weight: bold;">
-                        <a href="mailto:svmgarg@gmail.com?subject=API%20Key%20Request%20for%20Idempotency%20Service&body=Hi,%0A%0AI%20would%20like%20to%20request%20an%20API%20key%20for%20the%20Idempotency%20Service.%0A%0AThank%20you">
-                            📮 svmgarg@gmail.com
-                        </a>
-                    </div>
-                    <p style="margin-top: 15px; font-size: 0.95em;">
-                        In your email, please mention:
-                        <ul style="margin-left: 20px; margin-top: 10px;">
-                            <li>Your name or organization</li>
-                            <li>Use case for the API</li>
-                            <li>Expected request volume</li>
-                        </ul>
-                    </p>
-                </div>
+                <p>The <code>/check</code> endpoint requires API Key authentication.</p>
 
                 <h3>Header</h3>
-                <table class="parameter-table">
-                    <thead>
-                        <tr>
-                            <th>Header Name</th>
-                            <th>Value</th>
-                            <th>Required</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code>X-API-KEY</code></td>
-                            <td>Your assigned API key (provided by administrator)</td>
-                            <td><span class="badge required">Required</span></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Header Name</th>
+                                <th>Value</th>
+                                <th>Required</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>X-API-KEY</code></td>
+                                <td>Your assigned API key</td>
+                                <td><span class="badge bg-danger">Required</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
                 <div class="warning-box">
-                    <strong>⚠️ Important:</strong> The <code>/ping</code> endpoint does not require authentication. All other endpoints require API Key authentication.
+                    <strong>⚠️ Note:</strong> The <code>/ping</code> endpoint does not require authentication.
                 </div>
             </section>
 
@@ -462,360 +283,80 @@
                 <h2>🔍 Check API</h2>
 
                 <div class="endpoint">
-                    <div class="endpoint-header">
+                    <h3 style="margin-top: 0;">
                         <span class="method post">POST</span>
-                        <span class="url">/idempotency/check</span>
-                        <span class="auth-badge required">🔐 Auth Required</span>
+                        <code>/api/idempotency/check</code>
+                        <span class="badge bg-danger ms-2">Auth Required</span>
+                    </h3>
+                    <p>Atomically checks if an idempotency key exists and inserts it if not found.</p>
+
+                    <h4>Request Body</h4>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Type</th>
+                                    <th>Required</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>idempotencyKey</code></td>
+                                    <td>string</td>
+                                    <td><span class="badge bg-danger">Required</span></td>
+                                    <td>Unique key (1-64 characters)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>ttlSeconds</code></td>
+                                    <td>long</td>
+                                    <td><span class="badge bg-secondary">Optional</span></td>
+                                    <td>TTL in seconds (max 3600)</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
 
-                    <div class="description">
-                        <p>
-                            Atomically checks if an idempotency key exists and inserts it if not found or expired.
-                            This endpoint always returns <code>200 OK</code> for successful checks (even for duplicates)
-                            to support integrations like Zapier that treat non-2xx status codes as errors.
-                        </p>
-                    </div>
-
-                    <h3>Request Body</h3>
-                    <table class="parameter-table">
-                        <thead>
-                            <tr>
-                                <th>Field</th>
-                                <th>Type</th>
-                                <th>Required</th>
-                                <th>Description</th>
-                                <th>Constraints</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><code>idempotencyKey</code></td>
-                                <td>string</td>
-                                <td><span class="badge required">Required</span></td>
-                                <td>Unique key to identify the operation</td>
-                                <td>Max 64 characters</td>
-                            </tr>
-                            <tr>
-                                <td><code>clientId</code></td>
-                                <td>string</td>
-                                <td><span class="badge optional">Optional</span></td>
-                                <td>Client identifier for multi-tenant scenarios</td>
-                                <td>Max 64 characters</td>
-                            </tr>
-                            <tr>
-                                <td><code>ttlSeconds</code></td>
-                                <td>long</td>
-                                <td><span class="badge optional">Optional</span></td>
-                                <td>Custom TTL in seconds (overrides default 3600s)</td>
-                                <td>Max 3600 seconds (1 hour)</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <div class="warning-box">
-                        <strong>⚠️ Validation Rules:</strong>
-                        <ul style="margin-left: 20px; margin-top: 10px;">
-                            <li><strong>idempotencyKey:</strong> Must be between 1-64 characters. Use meaningful, unique identifiers (Payment ID, Order ID, etc.)</li>
-                            <li><strong>ttlSeconds:</strong> Maximum 3600 seconds (1 hour). Default is 3600s if not specified. This limits how long we remember processed operations.</li>
-                            <li>If you need longer memory windows, contact support for enterprise plans.</li>
-                        </ul>
-                    </div>
-
-
-                    <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
-                        <summary style="cursor: pointer; font-weight: 500; color: #2c3e50;">
-                            📤 Response Body Structure
-                        </summary>
-                        <div style="margin-top: 10px;">
-                            <table class="parameter-table">
-                        <thead>
-                            <tr>
-                                <th>Field</th>
-                                <th>Type</th>
-                                <th>Description</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><code>idempotencyKey</code></td>
-                                <td>string</td>
-                                <td>The idempotency key from the request</td>
-                            </tr>
-                            <tr>
-                                <td><code>isDuplicate</code></td>
-                                <td>boolean</td>
-                                <td><code>false</code> = new key (proceed), <code>true</code> = duplicate (skip)</td>
-                            </tr>
-                            <tr>
-                                <td><code>createdAt</code></td>
-                                <td>timestamp</td>
-                                <td>When the key was first created (ISO 8601 format)</td>
-                            </tr>
-                            <tr>
-                                <td><code>expiresAt</code></td>
-                                <td>timestamp</td>
-                                <td>When the key will expire (ISO 8601 format)</td>
-                            </tr>
-                            <tr>
-                                <td><code>processingTimeNanos</code></td>
-                                <td>long</td>
-                                <td>Processing time in nanoseconds</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                        </div>
-                    </details>
-
-                    <h3>Examples</h3>
-                    
-                    <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
-                        <summary style="cursor: pointer; font-weight: 500; color: #28a745;">
-                            ✅ New Key (Proceed with Operation)
-                        </summary>
-                        <div style="margin-top: 10px;">
-                            <details style="margin: 10px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
-                                <summary style="cursor: pointer; font-weight: 500; color: #333;">📤 Request</summary>
-                                <pre style="margin-top: 10px;"><code>POST /idempotency/check
+                    <h4>Example Request</h4>
+                    <pre><code>POST /api/idempotency/check
 Content-Type: application/json
-X-API-Key: your-api-key-here
-
-{
-  "idempotencyKey": "payment-123-abc",
-  "ttlSeconds": 3600
-}</code></pre>
-                            </details>
-                            <details style="margin: 10px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
-                                <summary style="cursor: pointer; font-weight: 500; color: #333;">📥 Response</summary>
-                                <pre style="margin-top: 10px;"><code>HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-  "idempotencyKey": "payment-123-abc",
-  "isDuplicate": false,
-  "createdAt": "2026-02-03T16:30:00.123Z",
-  "expiresAt": "2026-02-03T17:30:00.123Z",
-  "processingTimeNanos": 12500
-}</code></pre>
-                            </details>
-                        </div>
-                    </details>
-
-                    <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
-                        <summary style="cursor: pointer; font-weight: 500; color: #007bff;">
-                            ℹ️ Duplicate Key (Skip Operation)
-                        </summary>
-                        <div style="margin-top: 10px;">
-                            <details style="margin: 10px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
-                                <summary style="cursor: pointer; font-weight: 500; color: #333;">📤 Request</summary>
-                                <pre style="margin-top: 10px;"><code>POST /idempotency/check
-Content-Type: application/json
-X-API-Key: your-api-key-here
-
-{
-  "idempotencyKey": "payment-123-abc",
-  "ttlSeconds": 3600
-}</code></pre>
-                            </details>
-                            <details style="margin: 10px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
-                                <summary style="cursor: pointer; font-weight: 500; color: #333;">📥 Response</summary>
-                                <pre style="margin-top: 10px;"><code>HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-  "idempotencyKey": "payment-123-abc",
-  "isDuplicate": true,
-  "createdAt": "2026-02-03T16:30:00.123Z",
-  "expiresAt": "2026-02-03T17:30:00.123Z",
-  "processingTimeNanos": 8200
-}</code></pre>
-                            </details>
-                        </div>
-                    </details>
-
-                    <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
-                        <summary style="cursor: pointer; font-weight: 500; color: #dc3545;">
-                            ❌ Invalid Idempotency Key (Exceeds 64 chars)
-                        </summary>
-                        <div style="margin-top: 10px;">
-                            <details style="margin: 10px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
-                                <summary style="cursor: pointer; font-weight: 500; color: #333;">📤 Request</summary>
-                                <pre style="margin-top: 10px;"><code>POST /idempotency/check
-Content-Type: application/json
-
-{
-  "idempotencyKey": "this-is-a-very-long-key-that-exceeds-the-maximum-allowed-length-of-64-characters-xyz",
-  "ttlSeconds": 3600
-}</code></pre>
-                            </details>
-                            <details style="margin: 10px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
-                                <summary style="cursor: pointer; font-weight: 500; color: #333;">📥 Response</summary>
-                                <pre style="margin-top: 10px;"><code>HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-  "resultStatusCode": 400,
-  "message": "Validation failed",
-  "validationErrors": {
-    "idempotencyKey": "Idempotency key must be between 1 and 64 characters"
-  }
-}</code></pre>
-                            </details>
-                        </div>
-                    </details>
-
-                    <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
-                        <summary style="cursor: pointer; font-weight: 500; color: #dc3545;">
-                            ❌ TTL Exceeds Maximum (3600 seconds)
-                        </summary>
-                        <div style="margin-top: 10px;">
-                            <details style="margin: 10px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
-                                <summary style="cursor: pointer; font-weight: 500; color: #333;">📤 Request</summary>
-                                <pre style="margin-top: 10px;"><code>POST /idempotency/check
-Content-Type: application/json
+X-API-KEY: your-api-key-here
 
 {
   "idempotencyKey": "payment-123",
-  "ttlSeconds": 7200
-}</code></pre>
-                            </details>
-                            <details style="margin: 10px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
-                                <summary style="cursor: pointer; font-weight: 500; color: #333;">📥 Response</summary>
-                                <pre style="margin-top: 10px;"><code>HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-  "resultStatusCode": 400,
-  "message": "Validation failed",
-  "validationErrors": {
-    "ttlSeconds": "TTL cannot exceed 3600 seconds (1 hour)"
-  }
-}</code></pre>
-                            </details>
-                        </div>
-                    </details>
-
-                    <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
-                        <summary style="cursor: pointer; font-weight: 500; color: #dc3545;">
-                            ❌ Missing Required Idempotency Key
-                        </summary>
-                        <div style="margin-top: 10px;">
-                            <details style="margin: 10px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
-                                <summary style="cursor: pointer; font-weight: 500; color: #333;">📤 Request</summary>
-                                <pre style="margin-top: 10px;"><code>POST /idempotency/check
-Content-Type: application/json
-
-{
   "ttlSeconds": 3600
 }</code></pre>
-                            </details>
-                            <details style="margin: 10px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
-                                <summary style="cursor: pointer; font-weight: 500; color: #333;">📥 Response</summary>
-                                <pre style="margin-top: 10px;"><code>HTTP/1.1 200 OK
-Content-Type: application/json
 
-{
-  "resultStatusCode": 400,
-  "message": "Validation failed",
-  "validationErrors": {
-    "idempotencyKey": "Idempotency key is required"
-  }
+                    <h4>Example Response (New Key)</h4>
+                    <pre><code>{
+  "idempotencyKey": "payment-123",
+  "isDuplicate": false,
+  "createdAt": "2026-02-07T12:00:00Z",
+  "expiresAt": "2026-02-07T13:00:00Z",
+  "processingTimeNanos": 12500
 }</code></pre>
-                            </details>
-                        </div>
-                    </details>
-
-                    <h3>Response Codes</h3>
-                    <div style="margin: 20px 0;">
-                        <p><span class="response-code success">200 OK</span> All responses return 200 OK (check <code>resultStatusCode</code> in body for actual status)</p>
-                    </div>
-
-                    <div class="warning-box">
-                        <strong>⚠️ Important Behavior (Zapier Compatible):</strong>
-                        <ul style="margin-left: 20px; margin-top: 10px;">
-                            <li><strong>HTTP Status:</strong> Always <code>200 OK</code> for all responses (success, validation error, server error)</li>
-                            <li><strong>Actual Status:</strong> Check the <code>resultStatusCode</code> field in the response body:
-                                <ul style="margin-left: 20px; margin-top: 5px;">
-                                    <li><code>200</code> = Successful check (new or duplicate)</li>
-                                    <li><code>400</code> = Invalid request body or validation error</li>
-                                    <li><code>401</code> = Missing or invalid API key</li>
-                                    <li><code>500</code> = Server error occurred</li>
-                                </ul>
-                            </li>
-                            <li>Check <code>isDuplicate</code> field to determine if operation should proceed</li>
-                            <li>If <code>isDuplicate</code> is <code>false</code>, proceed with your operation</li>
-                            <li>If <code>isDuplicate</code> is <code>true</code>, skip the operation (already processed)</li>
-                            <li>Expired keys are automatically replaced with new entries</li>
-                        </ul>
-                    </div>
                 </div>
             </section>
 
             <!-- Health API Section -->
             <section class="section" id="health-api">
-                <h2>❤️ Health & Monitoring APIs</h2>
+                <h2>❤️ Health & Monitoring</h2>
 
                 <div class="endpoint">
-                    <div class="endpoint-header">
+                    <h3 style="margin-top: 0;">
                         <span class="method get">GET</span>
-                        <span class="url">/idempotency/health</span>
-                        <span class="auth-badge required">🔐 Auth Required</span>
-                    </div>
-
-                    <div class="description">
-                        <p>Health check endpoint that returns the operational status of the service.</p>
-                    </div>
-
-                    <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
-                        <summary style="cursor: pointer; font-weight: 500; color: #2c3e50;">
-                            📝 Request Example
-                        </summary>
-                        <pre style="margin-top: 10px;"><code>GET http://144.24.119.46:8080/idempotency/health
-X-API-KEY: your-api-key-here</code></pre>
-                    </details>
-
-                    <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
-                        <summary style="cursor: pointer; font-weight: 500; color: #2c3e50;">
-                            📤 Response Example
-                        </summary>
-                        <pre style="margin-top: 10px;"><code>HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-  "status": "UP",
-  "service": "idempotency-service",
-  "timestamp": "2026-02-03T16:30:00.123Z",
-  "message": "Service is healthy and operational"
-}</code></pre>
-                    </details>
+                        <code>/api/idempotency/health</code>
+                    </h3>
+                    <p>Health check endpoint - requires API key</p>
                 </div>
 
                 <div class="endpoint">
-                    <div class="endpoint-header">
+                    <h3 style="margin-top: 0;">
                         <span class="method get">GET</span>
-                        <span class="url">/idempotency/ping</span>
-                        <span class="auth-badge none">🔓 No Auth</span>
-                    </div>
-
-                    <div class="description">
-                        <p>Simple ping endpoint to verify service availability.</p>
-                    </div>
-
-                    <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
-                        <summary style="cursor: pointer; font-weight: 500; color: #2c3e50;">
-                            📝 Request Example
-                        </summary>
-                        <pre style="margin-top: 10px;"><code>GET http://144.24.119.46:8080/idempotency/ping</code></pre>
-                    </details>
-
-                    <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
-                        <summary style="cursor: pointer; font-weight: 500; color: #2c3e50;">
-                            📤 Response Example
-                        </summary>
-                        <pre style="margin-top: 10px;"><code>HTTP/1.1 200 OK
-Content-Type: text/plain
-
-pong</code></pre>
-                    </details>
+                        <code>/ping</code>
+                    </h3>
+                    <p>Simple ping endpoint - no authentication needed</p>
                 </div>
             </section>
 
@@ -823,222 +364,90 @@ pong</code></pre>
             <section class="section" id="examples">
                 <h2>💡 Usage Examples</h2>
 
-                <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
-                    <summary style="cursor: pointer; font-weight: 500; color: #2c3e50;">
-                        🔧 cURL Example
-                    </summary>
-                    <pre style="margin-top: 10px;"><code># Check idempotency (first request - new key)
-curl -X POST http://144.24.119.46:8080/idempotency/check \
+                <h3>cURL</h3>
+                <pre><code>curl -X POST http://144.24.119.46/api/idempotency/check \
   -H "Content-Type: application/json" \
   -H "X-API-KEY: your-api-key" \
   -d '{
-    "idempotencyKey": "payment-order-12345",
-    "clientId": "user-abc",
+    "idempotencyKey": "order-12345",
     "ttlSeconds": 3600
-  }'
+  }'</code></pre>
 
-# Response: {"isDuplicate": false, ...} - Proceed with operation
-
-# Check same key again (duplicate)
-curl -X POST http://144.24.119.46:8080/idempotency/check \
-  -H "Content-Type: application/json" \
-  -H "X-API-KEY: your-api-key" \
-  -d '{
-    "idempotencyKey": "payment-order-12345",
-    "clientId": "user-abc"
-  }'
-
-# Response: {"isDuplicate": true, ...} - Skip operation</code></pre>
-                </details>
-
-                <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
-                    <summary style="cursor: pointer; font-weight: 500; color: #2c3e50;">
-                        🔗 JavaScript/Fetch Example
-                    </summary>
-                    <pre style="margin-top: 10px;"><code>async function checkIdempotency(key, clientId) {
-  const response = await fetch('http://144.24.119.46:8080/idempotency/check', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-API-KEY': 'your-api-key'
-    },
-    body: JSON.stringify({
-      idempotencyKey: key,
-      clientId: clientId,
-      ttlSeconds: 3600
-    })
-  });
-
-  const result = await response.json();
-  
-  if (result.isDuplicate) {
-    console.log('Duplicate request - skipping operation');
-    return false;
+                <h3>JavaScript</h3>
+                <pre><code>fetch('http://144.24.119.46/api/idempotency/check', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-API-KEY': 'your-api-key'
+  },
+  body: JSON.stringify({
+    idempotencyKey: 'order-12345',
+    ttlSeconds: 3600
+  })
+}).then(r => r.json()).then(data => {
+  if (data.isDuplicate) {
+    console.log('Duplicate - skip operation');
   } else {
-    console.log('New request - proceeding with operation');
-    return true;
+    console.log('New request - proceed');
   }
-}</code></pre>
-                </details>
+});</code></pre>
 
-                <details style="margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9;">
-                    <summary style="cursor: pointer; font-weight: 500; color: #2c3e50;">
-                        🐍 Python Example
-                    </summary>
-                    <pre style="margin-top: 10px;"><code>import requests
+                <h3>Python</h3>
+                <pre><code>import requests
 
-def check_idempotency(key, client_id):
-    response = requests.post(
-        'http://144.24.119.46:8080/idempotency/check',
-        headers={
-            'Content-Type': 'application/json',
-            'X-API-KEY': 'your-api-key'
-        },
-        json={
-            'idempotencyKey': key,
-            'clientId': client_id,
-            'ttlSeconds': 3600
-        }
-    )
-    
-    result = response.json()
-    
-    if result['isDuplicate']:
-        print('Duplicate request - skipping operation')
-        return False
-    else:
-        print('New request - proceeding with operation')
-        return True</code></pre>
-                </details>
+response = requests.post(
+    'http://144.24.119.46/api/idempotency/check',
+    headers={'X-API-KEY': 'your-api-key'},
+    json={
+        'idempotencyKey': 'order-12345',
+        'ttlSeconds': 3600
+    }
+)
 
-                <h3>Integration Flow</h3>
-                <div class="info-box">
-                    <strong>Typical Integration Pattern:</strong>
-                    <ol style="margin-left: 20px; margin-top: 10px;">
-                        <li>Generate a unique idempotency key for your operation (e.g., UUID, transaction ID)</li>
-                        <li>Call <code>POST /idempotency/check</code> with the key</li>
-                        <li>Check the <code>isDuplicate</code> field in the response:
-                            <ul style="margin-left: 20px;">
-                                <li>If <code>false</code>: This is the first time seeing this key → Proceed with your operation</li>
-                                <li>If <code>true</code>: This key was already processed → Skip the operation and return cached result</li>
-                            </ul>
-                        </li>
-                        <li>The key will automatically expire after the TTL period</li>
-                    </ol>
-                </div>
+if response.json()['isDuplicate']:
+    print('Duplicate - skip operation')
+else:
+    print('New request - proceed')</code></pre>
             </section>
-
         </div>
-
-        <footer>
-            <p>© 2026 Idempotency Service | <a href="https://github.com/svmgarg/idempotent" target="_blank">GitHub Repository</a></p>
-            <p style="margin-top: 10px; opacity: 0.8;">Built with Spring Boot • Version 1.0.0</p>
-        </footer>
     </div>
 
+    <!-- Footer -->
+    <footer>
+        <p>© 2026 Idempotency Service | <a href="https://github.com/svmgarg/idempotent" target="_blank">GitHub Repository</a></p>
+        <p style="margin-top: 10px; opacity: 0.8;">Built with Spring Boot • Version 1.0.0</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const sidebar = document.getElementById('sidebar');
-        const container = document.getElementById('container');
-        const toggleBtn = document.getElementById('toggleBtn');
-        const closeBtn = document.getElementById('sidebarCloseBtn');
-        const navLinks = document.querySelectorAll('.nav-link');
-        let sidebarOpen = window.innerWidth > 768; // Desktop: open, Mobile: closed
-
-        // Initialize sidebar state based on screen size
-        if (!sidebarOpen) {
-            sidebar.classList.add('collapsed');
-            container.classList.add('sidebar-collapsed');
-        }
-
-        // Toggle sidebar on button click
-        toggleBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            sidebarOpen = !sidebarOpen;
-            if (sidebarOpen) {
-                sidebar.classList.remove('collapsed');
-                container.classList.remove('sidebar-collapsed');
-            } else {
-                sidebar.classList.add('collapsed');
-                container.classList.add('sidebar-collapsed');
-            }
-        });
-
-        // Close sidebar button
-        closeBtn.addEventListener('click', () => {
-            sidebar.classList.add('collapsed');
-            container.classList.add('sidebar-collapsed');
-            sidebarOpen = false;
-        });
-
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768 && sidebarOpen) {
-                if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
-                    sidebar.classList.add('collapsed');
-                    container.classList.add('sidebar-collapsed');
-                    sidebarOpen = false;
-                }
-            }
-        });
-
-        // Handle nav link clicks
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                navLinks.forEach(l => l.classList.remove('active'));
-                link.classList.add('active');
-                
-                // Auto-collapse on mobile after clicking link
-                if (window.innerWidth <= 768) {
-                    setTimeout(() => {
-                        sidebar.classList.add('collapsed');
-                        container.classList.add('sidebar-collapsed');
-                        sidebarOpen = false;
-                    }, 100);
-                }
-            });
-        });
-
-        // Update active link on scroll
-        window.addEventListener('scroll', () => {
-            const sections = document.querySelectorAll('.section');
-            let current = '';
-
-            sections.forEach(section => {
-                const sectionTop = section.offsetTop;
-                if (window.pageYOffset >= sectionTop - 200) {
-                    current = section.getAttribute('id');
-                }
-            });
-
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-                if (current && link.getAttribute('href') === `#${current}`) {
-                    link.classList.add('active');
-                }
-            });
-        });
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 768) {
-                sidebar.classList.remove('collapsed');
-                container.classList.remove('sidebar-collapsed');
-                sidebarOpen = true;
-            }
-        });
-
-        // Smooth scroll behavior
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
+        // Smooth scroll for nav links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                const href = link.getAttribute('href');
-                const target = document.querySelector(href);
+                const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
                     target.scrollIntoView({ behavior: 'smooth' });
                 }
             });
         });
+
+        // Active nav link on scroll
+        window.addEventListener('scroll', () => {
+            let current = '';
+            document.querySelectorAll('.section').forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
