@@ -218,6 +218,10 @@ body {
     margin: 0 0 0 0;
 }
 
+.zapier-content-block  .param-list {
+    margin-top: 0;
+}
+
 /* Zapier indented content block */
 .zapier-content-block {
     margin-left: 0;
@@ -286,6 +290,8 @@ body {
 .info-block p:first-child {
     margin-top: 0;
 }
+
+
 
 .info-block p:last-child {
     margin-bottom: 0;
