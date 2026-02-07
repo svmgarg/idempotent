@@ -124,6 +124,18 @@ function Deploy-ToServer {
     }
     
     Write-Log "✓ JAR file uploaded successfully" -Color $SuccessColor
+    
+    # Copy keystore file to server for HTTPS
+    Write-Log "Uploading keystore for HTTPS..." -Color $InfoColor
+    $keystorePath = Join-Path $ServiceDir "keystore.p12"
+    scp $keystorePath "${RemoteServer}:${RemoteAppPath}/"
+    
+    if ($LASTEXITCODE -ne 0) {
+        Write-Log "✗ Failed to upload keystore file" -Color $ErrorColor
+        exit 1
+    }
+    
+    Write-Log "✓ Keystore file uploaded successfully" -Color $SuccessColor
 }
 
 function Restart-Service {
@@ -150,7 +162,7 @@ function Restart-Service {
     Write-Log "Starting service on port $ServerPort (HTTPS)..." -Color $InfoColor
     ssh $RemoteServer @"
         cd $RemoteAppPath
-        nohup java -jar idempotency-service-1.0.0.jar --server.port=$ServerPort --server.ssl.enabled=true > service.log 2>&1 &
+        nohup java -jar idempotency-service-1.0.0.jar --server.port=$ServerPort --server.ssl.key-store=file:./keystore.p12 --server.ssl.key-store-password=idempotent123 > service.log 2>&1 &
         sleep 3
         ps -ef | grep java | grep idempotency-service
 "@
