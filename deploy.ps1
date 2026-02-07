@@ -6,7 +6,7 @@ param(
     [string]$ServerPort = "8080",
     [string]$SSHUser = "opc",
     [string]$SSHKeyPath = "$PSScriptRoot\.ssh\id_rsa",
-    [string]$RemoteAppPath = "/opt/idempotency-service",
+    [string]$RemoteAppPath = "/home/opc",
     [bool]$RunTests = $true,
     [bool]$BuildJar = $true,
     [bool]$RestartService = $true
@@ -115,19 +115,10 @@ function Deploy-ToServer {
     Write-Log "Deploying to Server..." -Color $InfoColor
     Write-Log "========================================" -Color $InfoColor
     
-    # Create remote directory if it doesn't exist
-    Write-Log "Setting up remote directory: $RemoteAppPath" -Color $InfoColor
-    ssh -i $SSHKeyPath $RemoteServer "sudo mkdir -p $RemoteAppPath && sudo chown $SSHUser $RemoteAppPath"
-    
-    if ($LASTEXITCODE -ne 0) {
-        Write-Log "✗ Failed to create remote directory" -Color $ErrorColor
-        exit 1
-    }
-    
-    # Copy JAR file to server (no backup)
-    Write-Log "Uploading JAR file..." -Color $InfoColor
+    # Copy JAR file to server
+    Write-Log "Uploading JAR file to $RemoteAppPath..." -Color $InfoColor
     $jarPath = Join-Path $ServiceDir $JarFile
-    scp -i $SSHKeyPath $jarPath "${RemoteServer}:${RemoteJarPath}"
+    scp -i $SSHKeyPath $jarPath "${RemoteServer}:${RemoteAppPath}/"
     
     if ($LASTEXITCODE -ne 0) {
         Write-Log "✗ Failed to upload JAR file" -Color $ErrorColor
@@ -147,18 +138,18 @@ function Restart-Service {
     Write-Log "Restarting Service..." -Color $InfoColor
     Write-Log "========================================" -Color $InfoColor
     
-    # Stop old service
-    Write-Log "Stopping service..." -Color $InfoColor
-    ssh -i $SSHKeyPath $RemoteServer "sudo systemctl stop idempotency-service 2>/dev/null || true"
+    # Kill any existing Java process
+    Write-Log "Stopping existing service..." -Color $InfoColor
+    ssh -i $SSHKeyPath $RemoteServer "pkill -9 -f 'idempotency-service' 2>/dev/null || true"
     Start-Sleep -Seconds 2
     
     # Start new service
     Write-Log "Starting service on port $ServerPort..." -Color $InfoColor
     ssh -i $SSHKeyPath $RemoteServer @"
         cd $RemoteAppPath
-        nohup java -jar app.jar --server.port=$ServerPort > service.log 2>&1 &
+        nohup java -jar idempotency-service-1.0.0.jar --server.port=$ServerPort > service.log 2>&1 &
         sleep 3
-        echo 'Service started with PID:' \$(pgrep -f 'java.*app.jar')
+        ps -ef | grep java | grep idempotency-service
 "@
     
     if ($LASTEXITCODE -ne 0) {
@@ -216,19 +207,15 @@ Server Details:
   - App Path: $RemoteAppPath
 
 Service URLs:
-  - Health Check: http://$ServerIP:$ServerPort/idempotency/health
-  - Ping: http://$ServerIP:$ServerPort/idempotency/ping
-  - Documentation: http://$ServerIP:$ServerPort/
+  - Health Check: http://${ServerIP}:${ServerPort}/idempotency/health
+  - Ping: http://${ServerIP}:${ServerPort}/idempotency/ping
+  - Documentation: http://${ServerIP}:${ServerPort}/
 
 Remote Access:
   - SSH: ssh -i $SSHKeyPath $RemoteServer
   - View Logs: tail -f $RemoteAppPath/service.log
-  - Stop Service: sudo systemctl stop idempotency-service
-  - Start Service: sudo systemctl start idempotency-service
-
-Rollback (if needed):
-  - Restore backup: sudo cp $RemoteBackupPath $RemoteJarPath
-  - Restart service: sudo systemctl restart idempotency-service
+  - Stop Service: pkill -f 'idempotency-service'
+  - Start Service: cd $RemoteAppPath && nohup java -jar idempotency-service-1.0.0.jar --server.port=$ServerPort > service.log 2>&1 &
 
 "@ -ForegroundColor $SuccessColor
 }
