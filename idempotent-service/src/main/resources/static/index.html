@@ -19,11 +19,12 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="#overview">Overview</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#quickstart">Quick Start</a></li>
                     <li class="nav-item"><a class="nav-link" href="#use-cases">Use Cases</a></li>
                     <li class="nav-item"><a class="nav-link" href="#authentication">Authentication</a></li>
                     <li class="nav-item"><a class="nav-link" href="#check-api">Check API</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#health-api">Health API</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#examples">Examples</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#tester">API Tester</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
                 </ul>
             </div>
         </div>
@@ -59,7 +60,39 @@
                 <pre><code>http://144.24.119.46/api/idempotency</code></pre>
             </section>
 
-            <!-- Use Cases Section -->
+            <!-- Quick Start Section -->
+            <section class="section" id="quickstart">
+                <h2>⚡ Quick Start (2 Minutes)</h2>
+                <p>Get up and running with the Idempotency Service in just a few steps:</p>
+
+                <div class="success-box">
+                    <strong>Step 1: Check the Service is Healthy</strong>
+                    <pre style="margin-top: 10px;"><code>curl http://144.24.119.46/ping</code></pre>
+                    <p style="margin-top: 10px; margin-bottom: 0;">Expected response: <code>PONG</code></p>
+                </div>
+
+                <div class="success-box">
+                    <strong>Step 2: Make Your First Idempotency Check</strong>
+                    <pre style="margin-top: 10px;"><code>curl -X POST http://144.24.119.46/api/idempotency/check \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: demo-key-123" \
+  -d '{"idempotencyKey": "order-001", "ttlSeconds": 3600}'</code></pre>
+                </div>
+
+                <div class="success-box">
+                    <strong>Step 3: Test Duplicate Detection</strong>
+                    <p>Run the same curl command again → You should get <code>"isDuplicate": true</code></p>
+                </div>
+
+                <h3>Integration Pattern</h3>
+                <p><strong>For your application:</strong></p>
+                <ol>
+                    <li>Generate a unique key (UUID, order-ID, etc.)</li>
+                    <li>Call <code>/api/idempotency/check</code> with your key</li>
+                    <li>If <code>isDuplicate: false</code> → execute your operation</li>
+                    <li>If <code>isDuplicate: true</code> → return cached result</li>
+                </ol>
+            </section>
             <section class="section" id="use-cases">
                 <h2>✅ Real-World Scenarios</h2>
                 <p>Here are common situations where duplicate triggers occur:</p>
@@ -199,19 +232,24 @@ X-API-KEY: your-api-key-here
 
             <!-- Examples Section -->
             <section class="section" id="examples">
-                <h2>💡 Usage Examples</h2>
+                <h2>💡 Code Examples</h2>
 
                 <h3>cURL</h3>
-                <pre><code>curl -X POST http://144.24.119.46/api/idempotency/check \
+                <div class="code-block">
+                    <button class="btn btn-sm btn-outline-primary copy-btn" title="Copy to clipboard">📋 Copy</button>
+                    <pre><code>curl -X POST http://144.24.119.46/api/idempotency/check \
   -H "Content-Type: application/json" \
   -H "X-API-KEY: your-api-key" \
   -d '{
     "idempotencyKey": "order-12345",
     "ttlSeconds": 3600
   }'</code></pre>
+                </div>
 
                 <h3>JavaScript</h3>
-                <pre><code>fetch('http://144.24.119.46/api/idempotency/check', {
+                <div class="code-block">
+                    <button class="btn btn-sm btn-outline-primary copy-btn" title="Copy to clipboard">📋 Copy</button>
+                    <pre><code>fetch('http://144.24.119.46/api/idempotency/check', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -228,9 +266,12 @@ X-API-KEY: your-api-key-here
     console.log('New request - proceed');
   }
 });</code></pre>
+                </div>
 
                 <h3>Python</h3>
-                <pre><code>import requests
+                <div class="code-block">
+                    <button class="btn btn-sm btn-outline-primary copy-btn" title="Copy to clipboard">📋 Copy</button>
+                    <pre><code>import requests
 
 response = requests.post(
     'http://144.24.119.46/api/idempotency/check',
@@ -245,6 +286,156 @@ if response.json()['isDuplicate']:
     print('Duplicate - skip operation')
 else:
     print('New request - proceed')</code></pre>
+                </div>
+            </section>
+
+            <!-- API Tester Section -->
+            <section class="section" id="tester">
+                <h2>🧪 Interactive API Tester</h2>
+                <p>Test the Idempotency Check API directly below:</p>
+
+                <div class="endpoint">
+                    <form id="testerForm" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="apiKey" class="form-label"><strong>API Key</strong></label>
+                            <input type="text" class="form-control" id="apiKey" placeholder="your-api-key" value="demo-key-123">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="idempotencyKey" class="form-label"><strong>Idempotency Key</strong></label>
+                            <input type="text" class="form-control" id="idempotencyKey" placeholder="e.g., order-123" value="">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="ttlSeconds" class="form-label"><strong>TTL Seconds</strong></label>
+                            <input type="number" class="form-control" id="ttlSeconds" placeholder="3600" value="3600" min="1" max="3600">
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <button type="button" class="btn btn-primary w-100" id="testBtn">🚀 Test API</button>
+                        </div>
+                    </form>
+
+                    <div id="testerResult" style="display: none; margin-top: 20px;">
+                        <h4>Response:</h4>
+                        <pre id="resultJson"><code>Waiting for response...</code></pre>
+                        <button class="btn btn-sm btn-outline-secondary" id="copyResultBtn">📋 Copy Response</button>
+                    </div>
+
+                    <div id="testerError" style="display: none; margin-top: 20px;" class="alert alert-danger"></div>
+                    <div id="testerLoading" style="display: none; margin-top: 20px;" class="alert alert-info">
+                        <div class="spinner-border spinner-border-sm me-2" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        Testing API...
+                    </div>
+                </div>
+            </section>
+
+            <!-- FAQ Section -->
+            <section class="section" id="faq">
+                <h2>❓ Frequently Asked Questions</h2>
+
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                What happens if I don't call the service?
+                            </button>
+                        </h2>
+                        <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Without idempotency checks, duplicate requests will execute your operation multiple times. This can result in duplicate charges, multiple orders, or repeated notifications.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                How long should I set the TTL?
+                            </button>
+                        </h2>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                TTL (Time-To-Live) depends on your use case: 
+                                <ul>
+                                    <li><strong>Orders/Payments:</strong> 1-6 hours (3600-21600 seconds)</li>
+                                    <li><strong>Quick operations:</strong> 5-10 minutes (300-600 seconds)</li>
+                                    <li><strong>Webhooks:</strong> Match your webhook retry timeout (usually 24-48 hours)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                What if the service is down?
+                            </button>
+                        </h2>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                If the service is unavailable, you should fail-safe by either:
+                                <ul>
+                                    <li>Retry your operation after service recovery</li>
+                                    <li>Use local caching as a fallback</li>
+                                    <li>Implement exponential backoff before retrying</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                Can I use any string as the idempotency key?
+                            </button>
+                        </h2>
+                        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes, any string 1-64 characters long works. Best practices:
+                                <ul>
+                                    <li><code>UUID</code> - Best for uniqueness</li>
+                                    <li><code>order-ID</code> - Descriptive</li>
+                                    <li><code>user-123-action-456</code> - More context</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                                What's the performance overhead?
+                            </button>
+                        </h2>
+                        <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Each check takes <strong>&lt;15ms</strong> on average:
+                                <ul>
+                                    <li>First request (new key): ~10-15ms</li>
+                                    <li>Duplicate request (existing key): ~5-10ms</li>
+                                    <li>Response includes processing time in nanoseconds for detailed metrics</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq6">
+                                How do I generate a good idempotency key?
+                            </button>
+                        </h2>
+                        <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Use a combination that uniquely identifies the operation:
+                                <pre><code>// Good examples:
+const key = `user-${userId}-order-${Date.now()}`;  // Descriptive + timestamp
+const key = crypto.randomUUID();                     // Pure uniqueness
+const key = `${userId}-${orderId}`;                 // User + order combo</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
         </div>
     </div>
@@ -257,6 +448,100 @@ else:
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Copy to clipboard functionality
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const codeBlock = this.nextElementSibling;
+                const code = codeBlock.textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    const originalText = this.textContent;
+                    this.textContent = '✅ Copied!';
+                    this.classList.add('copied');
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                    this.textContent = '❌ Failed';
+                    setTimeout(() => {
+                        this.textContent = '📋 Copy';
+                    }, 2000);
+                });
+            });
+        });
+
+        // API Tester functionality
+        document.getElementById('testBtn').addEventListener('click', async function() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const idempotencyKey = document.getElementById('idempotencyKey').value.trim();
+            const ttlSeconds = document.getElementById('ttlSeconds').value;
+
+            const errorDiv = document.getElementById('testerError');
+            const resultDiv = document.getElementById('testerResult');
+            const loadingDiv = document.getElementById('testerLoading');
+
+            errorDiv.style.display = 'none';
+            resultDiv.style.display = 'none';
+            loadingDiv.style.display = 'block';
+
+            // Validation
+            if (!apiKey) {
+                errorDiv.textContent = '❌ API Key is required';
+                errorDiv.style.display = 'block';
+                loadingDiv.style.display = 'none';
+                return;
+            }
+            if (!idempotencyKey) {
+                errorDiv.textContent = '❌ Idempotency Key is required';
+                errorDiv.style.display = 'block';
+                loadingDiv.style.display = 'none';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://144.24.119.46/api/idempotency/check', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-KEY': apiKey
+                    },
+                    body: JSON.stringify({
+                        idempotencyKey: idempotencyKey,
+                        ttlSeconds: parseInt(ttlSeconds) || 3600
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    errorDiv.textContent = `❌ Error: ${data.message || data.error || 'Unknown error'}`;
+                    errorDiv.style.display = 'block';
+                } else {
+                    document.getElementById('resultJson').textContent = JSON.stringify(data, null, 2);
+                    resultDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = `❌ Connection Error: ${error.message}`;
+                errorDiv.style.display = 'block';
+            } finally {
+                loadingDiv.style.display = 'none';
+            }
+        });
+
+        // Copy result functionality
+        document.getElementById('copyResultBtn').addEventListener('click', function() {
+            const resultText = document.getElementById('resultJson').textContent;
+            navigator.clipboard.writeText(resultText).then(() => {
+                const originalText = this.textContent;
+                this.textContent = '✅ Copied!';
+                setTimeout(() => {
+                    this.textContent = originalText;
+                }, 2000);
+            });
+        });
+
         // Smooth scroll for nav links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
@@ -284,6 +569,19 @@ else:
                     link.classList.add('active');
                 }
             });
+        });
+
+        // Allow Enter key to trigger test
+        document.getElementById('ttlSeconds').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('testBtn').click();
+            }
+        });
+
+        document.getElementById('idempotencyKey').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('testBtn').click();
+            }
         });
     </script>
 </body>
