@@ -5,7 +5,7 @@ param(
     [string]$ServerIP = "144.24.119.46",
     [string]$ServerPort = "8080",
     [string]$SSHUser = "opc",
-    [string]$SSHKeyPath = "$env:USERPROFILE\.ssh\id_rsa",
+    [string]$SSHKeyPath = "$PSScriptRoot\.ssh\id_rsa",
     [string]$RemoteAppPath = "/opt/idempotency-service",
     [bool]$RunTests = $true,
     [bool]$BuildJar = $true,

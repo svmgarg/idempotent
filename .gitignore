@@ -14,9 +14,15 @@ idempotent-service/target/
 .DS_Store
 Thumbs.db
 
-# Java
-*.class
-*.jar
-*.war
+# SSH Keys & Credentials (NEVER commit)
+.ssh/
+*.pem
+*.ppk
+*.key
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+
 *.ear
 *.zip
