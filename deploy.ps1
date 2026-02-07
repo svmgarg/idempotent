@@ -44,13 +44,6 @@ function Check-Prerequisites {
         exit 1
     }
     
-    # Check SSH Key
-    if (-not (Test-Path $SSHKeyPath)) {
-        Write-Log "✗ SSH key not found at: $SSHKeyPath" -Color $ErrorColor
-        exit 1
-    }
-    Write-Log "✓ SSH key found" -Color $SuccessColor
-    
     # Check connectivity to server
     Write-Log "Testing SSH connection to $RemoteServer..." -Color $InfoColor
     $sshTest = ssh -i $SSHKeyPath -o ConnectTimeout=5 $RemoteServer "echo 'Connection OK'" 2>&1
