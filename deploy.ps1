@@ -3,7 +3,7 @@
 
 param(
     [string]$ServerIP = "144.24.119.46",
-    [string]$ServerPort = "443",
+    [string]$ServerPort = "8443",
     [string]$SSHUser = "opc",
     [string]$RemoteAppPath = "/home/opc",
     [bool]$RunTests = $true,

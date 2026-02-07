@@ -1,5 +1,5 @@
 server:
-  port: ${SERVER_PORT:443}
+  port: ${SERVER_PORT:8443}
   ssl:
     enabled: true
     key-store: ${SERVER_SSL_KEYSTORE:file:./keystore.p12}
