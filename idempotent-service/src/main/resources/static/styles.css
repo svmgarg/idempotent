@@ -258,26 +258,6 @@ pre {
 }
 
 
-/* Footer */
-footer {
-    background: #2d2d2d;
-    color: white;
-    padding: 2rem;
-    text-align: center;
-    font-size: 0.9rem;
-    margin-top: 3rem;
-    margin-left: 0;
-}
-
-footer a {
-    color: var(--primary);
-    text-decoration: none;
-}
-
-footer a:hover {
-    text-decoration: underline;
-}
-
 /* Mobile Responsive */
 .sidebar-toggle {
     display: none;
@@ -329,11 +309,6 @@ footer a:hover {
     .main-content {
         padding: 1rem;
         min-height: auto;
-    }
-
-    footer {
-        margin-left: 0;
-        padding: 1.5rem 1rem;
     }
 }
 
