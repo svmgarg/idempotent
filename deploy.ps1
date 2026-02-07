@@ -3,7 +3,7 @@
 
 param(
     [string]$ServerIP = "144.24.119.46",
-    [string]$ServerPort = "8080",
+    [string]$ServerPort = "443",
     [string]$SSHUser = "opc",
     [string]$RemoteAppPath = "/home/opc",
     [bool]$RunTests = $true,
@@ -146,11 +146,11 @@ function Restart-Service {
     ssh $RemoteServer "pkill -9 -f java || true"
     Start-Sleep -Seconds 1
     
-    # Start new service
-    Write-Log "Starting service on port $ServerPort..." -Color $InfoColor
+    # Start new service with HTTPS on port 443
+    Write-Log "Starting service on port $ServerPort (HTTPS)..." -Color $InfoColor
     ssh $RemoteServer @"
         cd $RemoteAppPath
-        nohup java -jar idempotency-service-1.0.0.jar --server.port=$ServerPort > service.log 2>&1 &
+        nohup java -jar idempotency-service-1.0.0.jar --server.port=$ServerPort --server.ssl.enabled=true > service.log 2>&1 &
         sleep 3
         ps -ef | grep java | grep idempotency-service
 "@
@@ -170,14 +170,15 @@ function Verify-Deployment {
     
     $maxAttempts = 10
     $attempt = 0
-    $healthUrl = "http://${ServerIP}:${ServerPort}/idempotency/ping"
+    $healthUrl = "https://${ServerIP}:${ServerPort}/idempotency/ping"
     
     while ($attempt -lt $maxAttempts) {
         $attempt++
         Write-Log "Health check attempt $attempt/$maxAttempts..." -Color $InfoColor
         
         try {
-            $response = Invoke-WebRequest -Uri $healthUrl -TimeoutSec 5 -ErrorAction Stop
+            # Ignore SSL certificate validation for self-signed certificates
+            $response = Invoke-WebRequest -Uri $healthUrl -TimeoutSec 5 -SkipCertificateCheck -ErrorAction Stop
             if ($response.StatusCode -eq 200) {
                 Write-Log "✓ Service is healthy and responding" -Color $SuccessColor
                 Write-Log "  Endpoint: $healthUrl" -Color $SuccessColor
@@ -210,9 +211,9 @@ Server Details:
   - App Path: $RemoteAppPath
 
 Service URLs:
-  - Health Check: http://${ServerIP}:${ServerPort}/idempotency/health
-  - Ping: http://${ServerIP}:${ServerPort}/idempotency/ping
-  - Documentation: http://${ServerIP}:${ServerPort}/
+  - Health Check: https://${ServerIP}:${ServerPort}/idempotency/health
+  - Ping: https://${ServerIP}:${ServerPort}/idempotency/ping
+  - Documentation: https://${ServerIP}:${ServerPort}/
 
 Remote Access:
   - SSH: ssh $RemoteServer
