@@ -1,6 +1,6 @@
 # Maven build artifacts
+target/
 idempotent-service/target/
-!idempotent-service/target/*.jar
 
 # IDE
 .idea/
