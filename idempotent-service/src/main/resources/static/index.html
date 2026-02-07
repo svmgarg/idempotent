@@ -45,12 +45,6 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        <!-- Hero/Title Bar (Always visible) -->
-        <div class="page-header">
-            <h1 id="pageTitle">🔒 Idempotency Service</h1>
-            <p id="pageSubtitle">Never Process the Same Operation Twice</p>
-        </div>
-
         <!-- Content Area (SPA - One section at a time) -->
         <div class="content-area">
             <!-- Overview Section -->
@@ -585,22 +579,6 @@ const key = `${userId}-${orderId}`;                 // User + order combo</code>
             const activePage = document.querySelector(`[data-page="${pageId}"]`);
             if (activePage) {
                 activePage.classList.add('active');
-                
-                // Update page title
-                const titleMap = {
-                    'overview': '📖 Overview',
-                    'quickstart': '⚡ Quick Start',
-                    'use-cases': '✅ Use Cases',
-                    'authentication': '🔐 Authentication',
-                    'check-api': '🔍 Check API',
-                    'health-api': '❤️ Health API',
-                    'examples': '💡 Code Examples',
-                    'tester': '🧪 API Tester',
-                    'faq': '❓ FAQ'
-                };
-                
-                document.getElementById('pageTitle').textContent = titleMap[pageId] || 'Idempotency Service';
-                document.getElementById('pageSubtitle').textContent = 'Never Process the Same Operation Twice';
             }
             
             // Update active nav link
