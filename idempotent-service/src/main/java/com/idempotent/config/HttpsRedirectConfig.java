@@ -21,7 +21,7 @@ public class HttpsRedirectConfig {
             redirectConnector.setPort(8080);
             redirectConnector.setSecure(false);
             redirectConnector.setScheme("http");
-            redirectConnector.setAttribute("redirectPort", 443);
+            redirectConnector.setProperty("redirectPort", "443");
             
             factory.addAdditionalTomcatConnectors(redirectConnector);
         };
