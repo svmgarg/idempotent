@@ -14,13 +14,6 @@ server:
     accept-count: 100
     max-connections: 10000
 
-# HTTP to HTTPS redirect configuration
-management:
-  server:
-    port: 8080  # Management endpoints on HTTP port
-    ssl:
-      enabled: false
-
 spring:
   application:
     name: idempotency-service
