@@ -102,33 +102,71 @@
             </section>
             <section class="page" data-page="use-cases">
                 <h2>Real-World Scenarios</h2>
-                <p>Here are common situations where duplicate triggers occur:</p>
+                <p>Here are common situations where duplicate triggers occur and how this service helps:</p>
 
                 <div class="endpoint">
-                    <h3 style="margin-top: 0;">🛒 Order Creation (Most Common)</h3>
-                    <p>User clicks "Place Order" twice → Only one order is created</p>
+                    <h3>Order Creation (Most Common)</h3>
+                    <p><strong>Scenario:</strong> A user clicks "Place Order" twice or the client retries due to a timeout.</p>
+                    <p><strong>Without idempotency:</strong> Two orders can be created, customer may be charged twice.</p>
+                    <p><strong>With idempotency:</strong> Only the first request is processed and all retries return the same response.</p>
                 </div>
 
                 <div class="endpoint">
-                    <h3 style="margin-top: 0;">💳 Payment Processing</h3>
-                    <p>Payment API is retried due to double click → Payment executed only once</p>
+                    <h3>Payment Capture / Payment Processing</h3>
+                    <p><strong>Scenario:</strong> Payment API is retried due to double click or client retry for an order.</p>
+                    <p><strong>Without idempotency:</strong> Payment can be captured multiple times.</p>
+                    <p><strong>With idempotency:</strong> Payment is executed only once and retries return the original payment result.</p>
                 </div>
 
                 <div class="endpoint">
-                    <h3 style="margin-top: 0;">📦 Inventory Deduction</h3>
-                    <p>Inventory call is retried → Stock deducted only once</p>
+                    <h3>Inventory Reservation / Stock Deduction</h3>
+                    <p><strong>Scenario:</strong> Inventory reserve/deduct call is retried due to application crash or client retry.</p>
+                    <p><strong>Without idempotency:</strong> Stock may be reduced multiple times causing incorrect inventory.</p>
+                    <p><strong>With idempotency:</strong> Stock is deducted only once.</p>
                 </div>
 
                 <div class="endpoint">
-                    <h3 style="margin-top: 0;">🔔 Webhook Processing</h3>
-                    <p>Webhook providers retry events → Each event processed exactly once</p>
+                    <h3>Webhook Processing (Stripe / Razorpay / PayPal / Zapier)</h3>
+                    <p><strong>Scenario:</strong> Webhook providers retry the same webhook event multiple times.</p>
+                    <p><strong>Without idempotency:</strong> Duplicate invoice generation / duplicate order update / duplicate notifications.</p>
+                    <p><strong>With idempotency:</strong> Use webhook eventId as key and process each event exactly once.</p>
+                </div>
+
+                <div class="endpoint">
+                    <h3>Invoice Generation / Document Generation</h3>
+                    <p><strong>Scenario:</strong> Invoice generation is retried due to failure or retry policy.</p>
+                    <p><strong>Without idempotency:</strong> Multiple invoices can be created for the same order.</p>
+                    <p><strong>With idempotency:</strong> Invoice is generated only once.</p>
+                </div>
+
+                <div class="endpoint">
+                    <h3>Notification / Email / SMS Sending</h3>
+                    <p><strong>Scenario:</strong> Notification send is retried due to network issues.</p>
+                    <p><strong>Without idempotency:</strong> User receives duplicate emails/SMS.</p>
+                    <p><strong>With idempotency:</strong> Only one notification is sent per unique key.</p>
+                </div>
+
+                <div class="endpoint">
+                    <h3>Zapier Integration (Automation Safety)</h3>
+                    <p><strong>Scenario:</strong> Zapier workflows may trigger twice or retry because of network failures / step failures / replay.</p>
+                    <p><strong>Without idempotency:</strong> Duplicate CRM updates, duplicate Slack messages, duplicate payments.</p>
+                    <p><strong>With idempotency:</strong> Zapier sends a stable idempotency key and your service blocks duplicate execution.</p>
                 </div>
             </section>
 
             <!-- Authentication Section -->
             <section class="page" data-page="authentication">
                 <h2>Authentication</h2>
-                <p>The <code>/check</code> endpoint requires API Key authentication.</p>
+                <p>The <code>/check</code> endpoint requires API Key authentication. Include the API key in the request header.</p>
+
+                <h3>How to Get an API Key</h3>
+                <p><strong>Request API Key:</strong> To obtain an API key, please send a request email to: <a href="mailto:svmgarg@gmail.com?subject=API%20Key%20Request%20for%20Idempotency%20Service&body=Hi,%0A%0AI%20would%20like%20to%20request%20an%20API%20key%20for%20the%20Idempotency%20Service.%0A%0AThank%20you">svmgarg@gmail.com</a></p>
+                <p>In your email, please mention:</p>
+                <ul>
+                    <li>Your name or organization</li>
+                    <li>Use case for the API</li>
+                    <li>Expected request volume</li>
+                </ul>
 
                 <h3>Header</h3>
                 <div class="table-responsive">
@@ -143,7 +181,7 @@
                         <tbody>
                             <tr>
                                 <td><code>X-API-KEY</code></td>
-                                <td>Your assigned API key</td>
+                                <td>Your assigned API key (provided by administrator)</td>
                                 <td><span class="badge bg-danger">Required</span></td>
                             </tr>
                         </tbody>
@@ -151,7 +189,7 @@
                 </div>
 
                 <div class="warning-box">
-                    <strong>Note:</strong> The <code>/ping</code> endpoint does not require authentication.
+                    <strong>Important:</strong> The <code>/ping</code> endpoint does not require authentication. All other endpoints require API Key authentication.
                 </div>
             </section>
 
@@ -183,16 +221,31 @@
                                     <td><code>idempotencyKey</code></td>
                                     <td>string</td>
                                     <td><span class="badge bg-danger">Required</span></td>
-                                    <td>Unique key (1-64 characters)</td>
+                                    <td>Unique key to identify the operation | Max 64 characters</td>
+                                </tr>
+                                <tr>
+                                    <td><code>clientId</code></td>
+                                    <td>string</td>
+                                    <td><span class="badge bg-secondary">Optional</span></td>
+                                    <td>Client identifier for multi-tenant scenarios | Max 64 characters</td>
                                 </tr>
                                 <tr>
                                     <td><code>ttlSeconds</code></td>
                                     <td>long</td>
                                     <td><span class="badge bg-secondary">Optional</span></td>
-                                    <td>TTL in seconds (max 3600)</td>
+                                    <td>Custom TTL in seconds (overrides default 3600s) | Max 3600 seconds (1 hour)</td>
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+
+                    <div class="info-box">
+                        <strong>Validation Rules:</strong>
+                        <ul style="margin-top: 10px; margin-bottom: 0;">
+                            <li><code>idempotencyKey</code>: Must be between 1-64 characters. Use meaningful, unique identifiers (Payment ID, Order ID, etc.)</li>
+                            <li><code>ttlSeconds</code>: Maximum 3600 seconds (1 hour). Default is 3600s if not specified. This limits how long we remember processed operations.</li>
+                            <li>If you need longer memory windows, contact support for enterprise plans.</li>
+                        </ul>
                     </div>
 
                     <h4>Example Request</h4>
@@ -213,6 +266,28 @@ X-API-KEY: your-api-key-here
   "expiresAt": "2026-02-07T13:00:00Z",
   "processingTimeNanos": 12500
 }</code></pre>
+
+                    <h4>Response Codes</h4>
+                    <p><strong>200 OK</strong> All responses return 200 OK (check <code>resultStatusCode</code> in body for actual status)</p>
+
+                    <div class="info-box">
+                        <strong>Important Behavior (Zapier Compatible):</strong>
+                        <ul style="margin-top: 10px; margin-bottom: 0;">
+                            <li><strong>HTTP Status:</strong> Always <code>200 OK</code> for all responses (success, validation error, server error)</li>
+                            <li><strong>Actual Status:</strong> Check the <code>resultStatusCode</code> field in the response body:
+                                <ul>
+                                    <li><code>200</code> = Successful check (new or duplicate)</li>
+                                    <li><code>400</code> = Invalid request body or validation error</li>
+                                    <li><code>401</code> = Missing or invalid API key</li>
+                                    <li><code>500</code> = Server error occurred</li>
+                                </ul>
+                            </li>
+                            <li><strong>Check <code>isDuplicate</code> field</strong> to determine if operation should proceed</li>
+                            <li>If <code>isDuplicate</code> is <code>false</code>, proceed with your operation</li>
+                            <li>If <code>isDuplicate</code> is <code>true</code>, skip the operation (already processed)</li>
+                            <li>Expired keys are automatically replaced with new entries</li>
+                        </ul>
+                    </div>
                 </div>
             </section>
 
