@@ -31,10 +31,16 @@ body {
     z-index: 998;
     box-shadow: 2px 0 5px rgba(0,0,0,0.05);
     flex-shrink: 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.sidebar::-webkit-scrollbar {
+    display: none;
 }
 
 .sidebar-header {
-    padding: 2rem 1.5rem;
+    padding: 1.5rem 1rem;
     border-bottom: 1px solid #e0e0e0;
     position: sticky;
     top: 0;
@@ -48,11 +54,12 @@ body {
 .logo {
     color: #333;
     text-decoration: none;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: 700;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    white-space: nowrap;
 }
 
 .logo:hover {
@@ -124,25 +131,27 @@ body {
 
 /* Page Header */
 .page-header {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-    color: white;
-    padding: 3rem 2.5rem;
-    border-radius: 12px;
+    background: transparent;
+    color: #333;
+    padding: 1.5rem 0;
+    border-radius: 0;
     margin-bottom: 2rem;
-    text-align: center;
-    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+    text-align: left;
+    box-shadow: none;
+    border-bottom: 2px solid var(--primary);
 }
 
 .page-header h1 {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 700;
-    margin: 0 0 0.5rem 0;
+    margin: 0 0 0.25rem 0;
+    color: var(--primary);
 }
 
 .page-header p {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     margin: 0;
-    opacity: 0.95;
+    color: #666;
 }
 
 /* Content Area - SPA Pages */
@@ -176,11 +185,11 @@ body {
 .page h2 {
     color: var(--primary);
     font-weight: 700;
-    font-size: 2rem;
-    margin-top: 2rem;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 3px solid var(--primary);
+    font-size: 1.8rem;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--primary);
 }
 
 .page h3 {
