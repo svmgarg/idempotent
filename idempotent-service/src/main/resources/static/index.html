@@ -46,240 +46,111 @@
             opacity: 0.9;
         }
 
-        .content {
-            padding: 40px;
+        .nav-links {
+            display: none;
         }
 
-        .section {
-            margin-bottom: 40px;
-        }
-
-        .section h2 {
-            color: #667eea;
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e0e0e0;
-        }
-
-        .section h3 {
-            color: #764ba2;
-            font-size: 1.4rem;
-            margin-top: 25px;
-            margin-bottom: 15px;
-        }
-
-        .endpoint {
-            background: #f8f9fa;
-            border-left: 4px solid #667eea;
+        /* Sidebar Navigation */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 250px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 20px;
-            margin: 20px 0;
-            border-radius: 4px;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 1000;
         }
 
-        .endpoint-header {
+        .sidebar.collapsed {
+            transform: translateX(-250px);
+        }
+
+        .sidebar.show {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            color: white;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 8px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            transition: background 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .sidebar-nav a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-nav a.active {
+            background: rgba(255, 255, 255, 0.3);
+            font-weight: 600;
+            border-left: 3px solid white;
+            padding-left: 12px;
+        }
+
+        .toggle-sidebar {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            z-index: 1001;
+            display: none;
+        }
+
+        .toggle-sidebar:hover {
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        body.sidebar-open .toggle-sidebar {
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .method {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
-        }
-
-        .method.post {
-            background: #28a745;
-            color: white;
-        }
-
-        .method.get {
-            background: #007bff;
-            color: white;
-        }
-
-        .url {
-            font-family: 'Courier New', monospace;
-            font-size: 1.1rem;
-            color: #333;
-            font-weight: 500;
-        }
-
-        .auth-badge {
-            background: #ffc107;
-            color: #333;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            margin-left: auto;
-        }
-
-        .auth-badge.required {
-            background: #dc3545;
-            color: white;
-        }
-
-        .auth-badge.none {
-            background: #28a745;
-            color: white;
-        }
-
-        .description {
-            margin: 15px 0;
-            line-height: 1.8;
-        }
-
-        pre {
-            background: #2d2d2d;
-            color: #f8f8f2;
-            padding: 20px;
-            border-radius: 6px;
-            overflow-x: auto;
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-
-        code {
-            font-family: 'Courier New', monospace;
-        }
-
-        .parameter-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-radius: 6px;
-            overflow: hidden;
-        }
-
-        .parameter-table th,
-        .parameter-table td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .parameter-table th {
-            background: #667eea;
-            color: white;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
-        }
-
-        .parameter-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .parameter-table tr:hover {
-            background: #f8f9fa;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .badge.required {
-            background: #dc3545;
-            color: white;
-        }
-
-        .badge.optional {
-            background: #6c757d;
-            color: white;
-        }
-
-        .response-code {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-
-        .response-code.success {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .response-code.error {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .info-box {
-            background: #e7f3ff;
-            border-left: 4px solid #2196F3;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-
-        .warning-box {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-
-        .success-box {
-            background: #d4edda;
-            border-left: 4px solid #28a745;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-
-        footer {
-            background: #2d2d2d;
-            color: white;
-            padding: 20px;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-
-        footer a {
-            color: #667eea;
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
             justify-content: center;
         }
 
-        .nav-links a {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 4px;
-            text-decoration: none;
-            transition: background 0.3s;
+        .container {
+            margin-left: 250px;
+            transition: margin-left 0.3s ease;
         }
 
-        .nav-links a:hover {
-            background: rgba(255, 255, 255, 0.3);
+        .container.sidebar-collapsed {
+            margin-left: 0;
         }
 
         @media (max-width: 768px) {
@@ -303,22 +174,42 @@
             .auth-badge {
                 margin-left: 0;
             }
+
+            .sidebar {
+                width: 200px;
+            }
+
+            .container {
+                margin-left: 0;
+            }
+
+            .toggle-sidebar {
+                display: flex;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <button class="toggle-sidebar" id="toggleBtn" title="Toggle Navigation">☰</button>
+    
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>🔒 Idempotency</h2>
+        </div>
+        <ul class="sidebar-nav">
+            <li><a href="#overview" class="nav-link active">📖 Overview</a></li>
+            <li><a href="#use-cases" class="nav-link">✅ Use Cases</a></li>
+            <li><a href="#authentication" class="nav-link">🔐 Authentication</a></li>
+            <li><a href="#check-api" class="nav-link">🔍 Check API</a></li>
+            <li><a href="#health-api" class="nav-link">❤️ Health API</a></li>
+            <li><a href="#examples" class="nav-link">💡 Examples</a></li>
+        </ul>
+    </nav>
+
+    <div class="container" id="container">
         <header>
             <h1>🔒 Idempotency Service</h1>
             <p>Never Process the Same Operation Twice</p>
-            <div class="nav-links">
-                <a href="#overview">Overview</a>
-                <a href="#use-cases">Use Cases</a>
-                <a href="#authentication">Authentication</a>
-                <a href="#check-api">Check API</a>
-                <a href="#health-api">Health API</a>
-                <a href="#examples">Examples</a>
-            </div>
         </header>
 
         <div class="content">
@@ -1000,5 +891,60 @@ def check_idempotency(key, client_id):
             <p style="margin-top: 10px; opacity: 0.8;">Built with Spring Boot • Version 1.0.0</p>
         </footer>
     </div>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const container = document.getElementById('container');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const navLinks = document.querySelectorAll('.nav-link');
+        let sidebarOpen = true;
+
+        // Toggle sidebar
+        toggleBtn.addEventListener('click', () => {
+            sidebarOpen = !sidebarOpen;
+            if (sidebarOpen) {
+                sidebar.classList.remove('collapsed');
+                container.classList.remove('sidebar-collapsed');
+            } else {
+                sidebar.classList.add('collapsed');
+                container.classList.add('sidebar-collapsed');
+            }
+        });
+
+        // Close sidebar on mobile when link clicked
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                
+                // Auto-collapse on mobile
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.add('collapsed');
+                    container.classList.add('sidebar-collapsed');
+                    sidebarOpen = false;
+                }
+            });
+        });
+
+        // Update active link on scroll
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            let current = '';
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

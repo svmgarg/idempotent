@@ -5,7 +5,6 @@ param(
     [string]$ServerIP = "144.24.119.46",
     [string]$ServerPort = "8080",
     [string]$SSHUser = "opc",
-    [string]$SSHKeyPath = "$PSScriptRoot\.ssh\id_rsa",
     [string]$RemoteAppPath = "/home/opc",
     [bool]$RunTests = $true,
     [bool]$BuildJar = $true,
@@ -17,8 +16,6 @@ $ProjectPath = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ServiceDir = Join-Path $ProjectPath "idempotent-service"
 $RemoteServer = "$SSHUser@$ServerIP"
 $JarFile = "target/idempotency-service-1.0.0.jar"
-$RemoteJarPath = "$RemoteAppPath/app.jar"
-$RemoteBackupPath = "$RemoteAppPath/app.jar.backup"
 
 # Colors for output
 $SuccessColor = "Green"
@@ -46,7 +43,7 @@ function Check-Prerequisites {
     
     # Check connectivity to server
     Write-Log "Testing SSH connection to $RemoteServer..." -Color $InfoColor
-    $sshTest = ssh -i $SSHKeyPath -o ConnectTimeout=5 $RemoteServer "echo 'Connection OK'" 2>&1
+    $sshTest = ssh -o ConnectTimeout=5 $RemoteServer "echo 'Connection OK'" 2>&1
     if ($LASTEXITCODE -eq 0) {
         Write-Log "✓ SSH connection successful" -Color $SuccessColor
     }
@@ -108,10 +105,14 @@ function Deploy-ToServer {
     Write-Log "Deploying to Server..." -Color $InfoColor
     Write-Log "========================================" -Color $InfoColor
     
+    # Remove old JAR file from server
+    Write-Log "Removing old JAR file..." -Color $InfoColor
+    ssh $RemoteServer "rm -f $RemoteAppPath/idempotency-service-1.0.0.jar"
+    
     # Copy JAR file to server
-    Write-Log "Uploading JAR file to $RemoteAppPath..." -Color $InfoColor
+    Write-Log "Uploading new JAR file to $RemoteAppPath..." -Color $InfoColor
     $jarPath = Join-Path $ServiceDir $JarFile
-    scp -i $SSHKeyPath $jarPath "${RemoteServer}:${RemoteAppPath}/"
+    scp $jarPath "${RemoteServer}:${RemoteAppPath}/"
     
     if ($LASTEXITCODE -ne 0) {
         Write-Log "✗ Failed to upload JAR file" -Color $ErrorColor
@@ -133,12 +134,17 @@ function Restart-Service {
     
     # Kill any existing Java process
     Write-Log "Stopping existing service..." -Color $InfoColor
-    ssh -i $SSHKeyPath $RemoteServer "pkill -9 -f 'idempotency-service' 2>/dev/null || true"
+    ssh $RemoteServer "pkill -9 -f 'idempotency-service' 2>/dev/null || true"
     Start-Sleep -Seconds 2
+    
+    # Verify process is killed
+    Write-Log "Verifying process is terminated..." -Color $InfoColor
+    ssh $RemoteServer "pkill -9 -f java || true"
+    Start-Sleep -Seconds 1
     
     # Start new service
     Write-Log "Starting service on port $ServerPort..." -Color $InfoColor
-    ssh -i $SSHKeyPath $RemoteServer @"
+    ssh $RemoteServer @"
         cd $RemoteAppPath
         nohup java -jar idempotency-service-1.0.0.jar --server.port=$ServerPort > service.log 2>&1 &
         sleep 3
@@ -205,7 +211,7 @@ Service URLs:
   - Documentation: http://${ServerIP}:${ServerPort}/
 
 Remote Access:
-  - SSH: ssh -i $SSHKeyPath $RemoteServer
+  - SSH: ssh $RemoteServer
   - View Logs: tail -f $RemoteAppPath/service.log
   - Stop Service: pkill -f 'idempotency-service'
   - Start Service: cd $RemoteAppPath && nohup java -jar idempotency-service-1.0.0.jar --server.port=$ServerPort > service.log 2>&1 &
