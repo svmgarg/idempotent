@@ -62,7 +62,6 @@
                     <p><strong class="flow-title">1. First Request</strong> — Your app calls <code>/check</code> with a unique ID → Returns <code>isDuplicate: false</code></p>
                     <p><strong class="flow-title">2. Process</strong> — Your app executes the operation (payment, order, etc.) and caches the result</p>
                     <p><strong class="flow-title">3. Duplicate Request</strong> — Same ID arrives again → Calls <code>/check</code> → Returns <code>isDuplicate: true</code></p>
-                    <p><strong class="flow-title">4. Skip</strong> — Your app returns the cached result WITHOUT re-executing</p>
                 </div>
 
                 <h3>Base URL</h3>

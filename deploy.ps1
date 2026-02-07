@@ -31,6 +31,10 @@ function Write-Log {
 function Check-Prerequisites {
     Write-Log "Checking prerequisites..." -Color $InfoColor
     
+    # Set Java 17 path
+    $env:JAVA_HOME = "C:\Program Files\Microsoft\jdk-17.0.18.8-hotspot"
+    Write-Log "✓ Set JAVA_HOME to: $env:JAVA_HOME" -Color $SuccessColor
+    
     # Check Maven
     try {
         $mavenVersion = mvn -v 2>&1 | Select-Object -First 1
