@@ -23,11 +23,15 @@
             <h5 class="nav-section-title">Documentation</h5>
             <ul class="nav-list">
                 <li><a href="#overview" class="nav-link-sidebar">Overview</a></li>
-                <li><a href="#quickstart" class="nav-link-sidebar">Quick Start</a></li>
                 <li><a href="#use-cases" class="nav-link-sidebar">Use Cases</a></li>
             </ul>
 
             <h5 class="nav-section-title">Integration</h5>
+            <ul class="nav-list">
+                <li><a href="#zapier" class="nav-link-sidebar">Zapier</a></li>
+            </ul>
+
+            <h5 class="nav-section-title">API</h5>
             <ul class="nav-list">
                 <li><a href="#authentication" class="nav-link-sidebar">Authentication</a></li>
                 <li><a href="#check-api" class="nav-link-sidebar">Check API</a></li>
@@ -50,205 +54,313 @@
             <!-- Overview Section -->
             <section class="page" data-page="overview">
                 <h2>Overview</h2>
-                <p>The Idempotency Service is your safety net against duplicate triggers.</p>
+                <p class="lead">The Idempotency Service is your safety net against duplicate triggers.</p>
                 <p>In distributed systems, the same request can arrive multiple times due to network failures, user retries, automation tool retries, or client-side issues. Without idempotency, this means the same operation gets executed multiple times—resulting in duplicate charges, double-booked seats, duplicate orders, or duplicate notifications.</p>
                 
-                <div class="info-box">
-                    <strong>How It Works:</strong>
-                    <ol style="margin-top: 10px;">
-                        <li><strong>First Request:</strong> Your app calls <code>/check</code> with a unique ID → Returns <code>isDuplicate: false</code></li>
-                        <li><strong>Process:</strong> Your app executes the operation (payment, order, etc.) and caches the result</li>
-                        <li><strong>Duplicate Request:</strong> Same ID arrives again → Calls <code>/check</code> → Returns <code>isDuplicate: true</code></li>
-                        <li><strong>Skip:</strong> Your app returns the cached result WITHOUT re-executing</li>
-                    </ol>
+                <h3>How It Works</h3>
+                <div class="info-block">
+                    <p><strong class="flow-title">1. First Request</strong> — Your app calls <code>/check</code> with a unique ID → Returns <code>isDuplicate: false</code></p>
+                    <p><strong class="flow-title">2. Process</strong> — Your app executes the operation (payment, order, etc.) and caches the result</p>
+                    <p><strong class="flow-title">3. Duplicate Request</strong> — Same ID arrives again → Calls <code>/check</code> → Returns <code>isDuplicate: true</code></p>
+                    <p><strong class="flow-title">4. Skip</strong> — Your app returns the cached result WITHOUT re-executing</p>
                 </div>
 
                 <h3>Base URL</h3>
                 <pre><code>http://144.24.119.46/api/idempotency</code></pre>
             </section>
 
-            <!-- Quick Start Section -->
-            <section class="page" data-page="quickstart">
-                <h2>Quick Start</h2>
-                <p>Get up and running with the Idempotency Service in just a few steps:</p>
-
-                <div class="success-box">
-                    <strong>Step 1: Check the Service is Healthy</strong>
-                    <pre style="margin-top: 10px;"><code>curl http://144.24.119.46/ping</code></pre>
-                    <p style="margin-top: 10px; margin-bottom: 0;">Expected response: <code>PONG</code></p>
-                </div>
-
-                <div class="success-box">
-                    <strong>Step 2: Make Your First Idempotency Check</strong>
-                    <pre style="margin-top: 10px;"><code>curl -X POST http://144.24.119.46/api/idempotency/check \
-  -H "Content-Type: application/json" \
-  -H "X-API-KEY: demo-key-123" \
-  -d '{"idempotencyKey": "order-001", "ttlSeconds": 3600}'</code></pre>
-                </div>
-
-                <div class="success-box">
-                    <strong>Step 3: Test Duplicate Detection</strong>
-                    <p>Run the same curl command again → You should get <code>"isDuplicate": true</code></p>
-                </div>
-
-                <h3>Integration Pattern</h3>
-                <p><strong>For your application:</strong></p>
-                <ol>
-                    <li>Generate a unique key (UUID, order-ID, etc.)</li>
-                    <li>Call <code>/api/idempotency/check</code> with your key</li>
-                    <li>If <code>isDuplicate: false</code> → execute your operation</li>
-                    <li>If <code>isDuplicate: true</code> → return cached result</li>
-                </ol>
-            </section>
+            <!-- Real-World Scenarios Section -->
             <section class="page" data-page="use-cases">
                 <h2>Real-World Scenarios</h2>
                 <p>Here are common situations where duplicate triggers occur and how this service helps:</p>
 
-                <div class="endpoint">
-                    <h3>Order Creation (Most Common)</h3>
+                <div class="use-case">
+                    <h3>1. Order Creation (Most Common)</h3>
                     <p><strong>Scenario:</strong> A user clicks "Place Order" twice or the client retries due to a timeout.</p>
                     <p><strong>Without idempotency:</strong> Two orders can be created, customer may be charged twice.</p>
                     <p><strong>With idempotency:</strong> Only the first request is processed and all retries return the same response.</p>
                 </div>
 
-                <div class="endpoint">
-                    <h3>Payment Capture / Payment Processing</h3>
+                <div class="use-case">
+                    <h3>2. Payment Capture / Payment Processing</h3>
                     <p><strong>Scenario:</strong> Payment API is retried due to double click or client retry for an order.</p>
                     <p><strong>Without idempotency:</strong> Payment can be captured multiple times.</p>
                     <p><strong>With idempotency:</strong> Payment is executed only once and retries return the original payment result.</p>
                 </div>
 
-                <div class="endpoint">
-                    <h3>Inventory Reservation / Stock Deduction</h3>
+                <div class="use-case">
+                    <h3>3. Inventory Reservation / Stock Deduction</h3>
                     <p><strong>Scenario:</strong> Inventory reserve/deduct call is retried due to application crash or client retry.</p>
                     <p><strong>Without idempotency:</strong> Stock may be reduced multiple times causing incorrect inventory.</p>
                     <p><strong>With idempotency:</strong> Stock is deducted only once.</p>
                 </div>
 
-                <div class="endpoint">
-                    <h3>Webhook Processing (Stripe / Razorpay / PayPal / Zapier)</h3>
+                <div class="use-case">
+                    <h3>4. Webhook Processing (Stripe / Razorpay / PayPal / Zapier)</h3>
                     <p><strong>Scenario:</strong> Webhook providers retry the same webhook event multiple times.</p>
                     <p><strong>Without idempotency:</strong> Duplicate invoice generation / duplicate order update / duplicate notifications.</p>
                     <p><strong>With idempotency:</strong> Use webhook eventId as key and process each event exactly once.</p>
                 </div>
 
-                <div class="endpoint">
-                    <h3>Invoice Generation / Document Generation</h3>
+                <div class="use-case">
+                    <h3>5. Invoice Generation / Document Generation</h3>
                     <p><strong>Scenario:</strong> Invoice generation is retried due to failure or retry policy.</p>
                     <p><strong>Without idempotency:</strong> Multiple invoices can be created for the same order.</p>
                     <p><strong>With idempotency:</strong> Invoice is generated only once.</p>
                 </div>
 
-                <div class="endpoint">
-                    <h3>Notification / Email / SMS Sending</h3>
+                <div class="use-case">
+                    <h3>6. Notification / Email / SMS Sending</h3>
                     <p><strong>Scenario:</strong> Notification send is retried due to network issues.</p>
                     <p><strong>Without idempotency:</strong> User receives duplicate emails/SMS.</p>
                     <p><strong>With idempotency:</strong> Only one notification is sent per unique key.</p>
                 </div>
 
-                <div class="endpoint">
-                    <h3>Zapier Integration (Automation Safety)</h3>
+                <div class="use-case">
+                    <h3>7. Zapier Integration (Automation Safety)</h3>
                     <p><strong>Scenario:</strong> Zapier workflows may trigger twice or retry because of network failures / step failures / replay.</p>
                     <p><strong>Without idempotency:</strong> Duplicate CRM updates, duplicate Slack messages, duplicate payments.</p>
                     <p><strong>With idempotency:</strong> Zapier sends a stable idempotency key and your service blocks duplicate execution.</p>
                 </div>
             </section>
 
-            <!-- Authentication Section -->
-            <section class="page" data-page="authentication">
-                <h2>Authentication</h2>
-                <p>The <code>/check</code> endpoint requires API Key authentication. Include the API key in the request header.</p>
+            <!-- Zapier Section -->
+            <section class="page" data-page="zapier">
+                <h2>Zapier Integration</h2>
+                <p class="lead">Integrate the Idempotency Service with Zapier workflows to prevent duplicate actions.</p>
+                <p>Zapier can retry actions due to network failures or step failures. Use the Idempotency integration to ensure each action executes exactly once, even if retried multiple times.</p>
 
-                <h3>How to Get an API Key</h3>
-                <p><strong>Request API Key:</strong> To obtain an API key, please send a request email to: <a href="mailto:svmgarg@gmail.com?subject=API%20Key%20Request%20for%20Idempotency%20Service&body=Hi,%0A%0AI%20would%20like%20to%20request%20an%20API%20key%20for%20the%20Idempotency%20Service.%0A%0AThank%20you">svmgarg@gmail.com</a></p>
-                <p>In your email, please mention:</p>
-                <ul>
-                    <li>Your name or organization</li>
-                    <li>Use case for the API</li>
-                    <li>Expected request volume</li>
-                </ul>
+                <div class="info-block" style="display: flex; align-items: flex-start; gap: 0.75rem; background: #fff3cd; border-left: 4px solid #ffc107;">
+                    <span style="font-size: 1.1rem;">⚠️</span>
+                    <span><strong>Important:</strong> The Idempotency Service is <strong>not</strong> to handle retries. It is designed to <strong>identify duplicate triggers</strong>. Your Zap remains responsible for managing retries. The service simply tells you if a request is new or a duplicate, so you can skip processing if needed.</span>
+                </div>
 
-                <h3>Header</h3>
-                <div class="table-responsive">
-                    <table class="table table-hover">
+                <hr>
+                <h3>Setup Steps</h3>
+                <div class="info-block">
+                    <p><strong class="flow-title">1. Create a New Zap</strong> — Start building a Zap in your Zapier workspace</p>
+                    <p><strong class="flow-title">2. Add Trigger</strong> — Choose your trigger (e.g., webhook, schedule, form submission)</p>
+                    <p><strong class="flow-title">3. Add Action</strong> — Search for "Idempotency" integration and select the "Check Idempotency" action</p>
+                    <p><strong class="flow-title">4. Configure Authentication</strong> — Provide your API Key when prompted</p>
+                    <p><strong class="flow-title">5. Map Idempotency Key</strong> — Set the Idempotency Key field (see examples below)</p>
+                    <p><strong class="flow-title">6. Conditional Logic</strong> — Use the response to branch: If duplicate → skip, if new → execute next step</p>
+                </div>
+
+                <hr>
+                <h3>Check Idempotency Action</h3>
+                <div class="content-block">
+                    <p>The "Check Idempotency" action atomically checks if a key has been seen before and registers new keys for future tracking.</p>
+
+                <div class="zapier-content-block">
+                    <h4 class="zapier-sub-heading">Input</h4>
+                    <div class="param-list">
+                        <div class="param-item">
+                            <div class="param-header">
+                                <code>Idempotency Key</code>
+                                <span class="param-type">string (required)</span>
+                            </div>
+                            <p class="param-desc">Unique identifier for this action. Max 64 characters. Examples: webhook event ID, user ID + action combo, order ID, etc.</p>
+                        </div>
+                    </div>
+
+                    <h4 class="zapier-sub-heading">Output</h4>
+                    <p>The action returns the following fields (for more details, refer to the <a href="#check-api" onclick="showPage('check-api'); return false;" class="email-link">Check API section</a>):</p>
+                    <table class="table table-sm">
                         <thead>
                             <tr>
-                                <th>Header Name</th>
-                                <th>Value</th>
-                                <th>Required</th>
+                                <th>Field</th>
+                                <th>Type</th>
+                                <th>Description</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td><code>X-API-KEY</code></td>
-                                <td>Your assigned API key (provided by administrator)</td>
-                                <td><span class="badge bg-danger">Required</span></td>
+                                <td><code>isDuplicate</code></td>
+                                <td>boolean</td>
+                                <td><code>true</code> = key already seen (skip execution), <code>false</code> = first time (proceed)</td>
+                            </tr>
+                            <tr>
+                                <td><code>idempotencyKey</code></td>
+                                <td>string</td>
+                                <td>The key you submitted</td>
+                            </tr>
+                            <tr>
+                                <td><code>createdAt</code></td>
+                                <td>timestamp</td>
+                                <td>When the key was first registered (ISO 8601 format)</td>
+                            </tr>
+                            <tr>
+                                <td><code>expiresAt</code></td>
+                                <td>timestamp</td>
+                                <td>When the key expires and will no longer be tracked</td>
+                            </tr>
+                            <tr>
+                                <td><code>resultStatusCode</code></td>
+                                <td>number</td>
+                                <td>HTTP status code: 200 (success), 400 (validation error), 401 (auth error)</td>
+                            </tr>
+                            <tr>
+                                <td><code>message</code></td>
+                                <td>string</td>
+                                <td>Human-readable status or error message</td>
+                            </tr>
+                            <tr>
+                                <td><code>processingTimeNanos</code></td>
+                                <td>number</td>
+                                <td>Processing time in nanoseconds (for performance tracking)</td>
                             </tr>
                         </tbody>
                     </table>
+
+                    <h4 class="zapier-sub-heading">Example Response</h4>
+                    <pre><code>{
+  "isDuplicate": false,
+  "idempotencyKey": "webhook-stripe-evt-123",
+  "createdAt": "2026-02-07T09:53:36.894236031Z",
+  "expiresAt": "2026-02-07T10:53:36.894236031Z",
+  "resultStatusCode": 200,
+  "message": "Success",
+  "processingTimeNanos": 12500
+}</code></pre>
+                </div>
+                </div>
+                
+
+                <hr>
+                <h3>Workflow Pattern</h3>
+                <div class="content-block">
+                    <p>Typical flow in your Zapier Zap:</p>
+                    <p><strong class="flow-title">1.</strong> Trigger fires (webhook, schedule, form, etc.)</p>
+                    <p><strong class="flow-title">2.</strong> Call "Check Idempotency" action with unique key</p>
+                    <p><strong class="flow-title">3.</strong> Check result:</p>
+                    <p style="margin-left: 2rem;">• <strong>If isDuplicate = false</strong> → Action is new, proceed to next steps (create order, send email, update CRM, etc.)</p>
+                    <p style="margin-left: 2rem;">• <strong>If isDuplicate = true</strong> → Action already processed, skip remaining steps or branch to notification action</p>
                 </div>
 
-                <div class="warning-box">
-                    <strong>Important:</strong> The <code>/ping</code> endpoint does not require authentication. All other endpoints require API Key authentication.
+                <hr>
+                <h3>Zapier Use Cases</h3>
+
+                <div class="content-block">
+                    <div class="zapier-use-case">
+                        <h4>Webhook Events (Stripe, PayPal, etc.)</h4>
+                        <p><strong>Scenario:</strong> Payment providers send webhook events that may be delivered multiple times due to system issues.</p>
+                        <p><strong>Solution:</strong> Use webhook event ID as idempotency key to detect and skip duplicate events:</p>
+                        <pre><code>Idempotency Key = Webhook Event ID (e.g., evt_stripe_1A2B3C)</code></pre>
+                    </div>
+
+                    <div class="zapier-use-case">
+                        <h4>Form Submissions</h4>
+                        <p><strong>Scenario:</strong> Users submit forms multiple times (accidental double-clicks, page refreshes, etc.).</p>
+                        <p><strong>Solution:</strong> Use user ID + form submission identifier to detect duplicates:</p>
+                        <pre><code>Idempotency Key = user_789_form_lead_2026-02-07</code></pre>
+                    </div>
+
+                    <div class="content-block" style="display: flex; align-items: flex-start; gap: 0.75rem; background: #e7f3ff; border-left: 4px solid #667eea;">
+                        <span style="font-size: 1.1rem; color: #667eea;" title="More information available">ℹ️</span>
+                        <span>For more detailed scenarios including orders, payments, inventory, invoices, notifications, and more, visit the <a href="#use-cases" onclick="showPage('use-cases'); return false;" class="email-link">Use Cases page</a>.</span>
+                    </div>
+                </div>
+
+                <hr>
+                <h3>How to Generate a Good Idempotency Key</h3>
+                <p>Choose a unique combination that identifies the operation:</p>
+                <div class="status-list">
+                    <div class="status-item">
+                        <span class="status-code success">✓ Good</span>
+                        <span class="status-desc">Webhook event ID: <code>evt_stripe_12345</code></span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-code success">✓ Good</span>
+                        <span class="status-desc">User + Action: <code>user_789_create_order</code></span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-code success">✓ Good</span>
+                        <span class="status-desc">Order ID: <code>order_2026020799999</code></span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-code danger">✗ Avoid</span>
+                        <span class="status-desc">Timestamps only: <code>2026-02-07T09:53:36Z</code> (not unique across retries)</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-code danger">✗ Avoid</span>
+                        <span class="status-desc">Empty or duplicate keys across different requests</span>
+                    </div>
+                </div>
+
+                <hr>
+                <h3>Authentication</h3>
+                <p>When you add the "Check Idempotency" action, Zapier will prompt for your API Key. Provide the API Key you received from us. This authenticates all requests to the Idempotency Service.</p>
+                <p>Don't have an API Key? <a href="#authentication" onclick="showPage('authentication'); return false;" class="email-link">Request one here</a>.</p>
+            </section>
+
+            <!-- Authentication Section -->
+            <section class="page" data-page="authentication">
+                <h2>Authentication</h2>
+                <p class="lead">All API endpoints require API Key authentication, except <code>/ping</code>.</p>
+
+                <h3>Request Header</h3>
+                <div class="section-card">
+                    <div class="header-row">
+                        <span class="header-name"><code>X-API-KEY</code></span>
+                        <span class="header-value">Your assigned API key</span>
+                        <span class="badge bg-danger">Required</span>
+                    </div>
+                </div>
+
+                <h3>How to Get an API Key</h3>
+                <p>Email <a href="mailto:svmgarg@gmail.com?subject=API%20Key%20Request%20for%20Idempotency%20Service&body=Hi,%0A%0AI%20would%20like%20to%20request%20an%20API%20key%20for%20the%20Idempotency%20Service.%0A%0AName%20%2F%20Organization:%0AUse%20Case:%0AExpected%20Volume:%0A%0AThank%20you" class="email-link">svmgarg@gmail.com</a> with the following details:</p>
+                <div class="info-block">
+                    <p><strong class="flow-title">1.</strong> Your name or organization</p>
+                    <p><strong class="flow-title">2.</strong> Use case for the API</p>
+                    <p><strong class="flow-title">3.</strong> Expected request volume</p>
                 </div>
             </section>
 
             <!-- Check API Section -->
             <section class="page" data-page="check-api">
                 <h2>Check API</h2>
+                <p class="lead">Atomically checks if an idempotency key exists and inserts it if not found.</p>
 
-                <div class="endpoint">
-                    <h3 style="margin-top: 0;">
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
                         <span class="method post">POST</span>
                         <code>/api/idempotency/check</code>
-                        <span class="badge bg-danger ms-2">Auth Required</span>
-                    </h3>
-                    <p>Atomically checks if an idempotency key exists and inserts it if not found.</p>
-
-                    <h4>Request Body</h4>
-                    <div class="table-responsive">
-                        <table class="table table-hover table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Field</th>
-                                    <th>Type</th>
-                                    <th>Required</th>
-                                    <th>Description</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><code>idempotencyKey</code></td>
-                                    <td>string</td>
-                                    <td><span class="badge bg-danger">Required</span></td>
-                                    <td>Unique key to identify the operation | Max 64 characters</td>
-                                </tr>
-                                <tr>
-                                    <td><code>clientId</code></td>
-                                    <td>string</td>
-                                    <td><span class="badge bg-secondary">Optional</span></td>
-                                    <td>Client identifier for multi-tenant scenarios | Max 64 characters</td>
-                                </tr>
-                                <tr>
-                                    <td><code>ttlSeconds</code></td>
-                                    <td>long</td>
-                                    <td><span class="badge bg-secondary">Optional</span></td>
-                                    <td>Custom TTL in seconds (overrides default 3600s) | Max 3600 seconds (1 hour)</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <span class="badge bg-danger ms-auto">Auth Required</span>
                     </div>
+                </div>
 
-                    <div class="info-box">
-                        <strong>Validation Rules:</strong>
-                        <ul style="margin-top: 10px; margin-bottom: 0;">
-                            <li><code>idempotencyKey</code>: Must be between 1-64 characters. Use meaningful, unique identifiers (Payment ID, Order ID, etc.)</li>
-                            <li><code>ttlSeconds</code>: Maximum 3600 seconds (1 hour). Default is 3600s if not specified. This limits how long we remember processed operations.</li>
-                            <li>If you need longer memory windows, contact support for enterprise plans.</li>
-                        </ul>
+                <div class="api-section">
+                    <h3>Request Body</h3>
+                    <div class="param-list">
+                        <div class="param-item">
+                            <div class="param-header">
+                                <code>idempotencyKey</code>
+                                <span class="param-type">string</span>
+                                <span class="badge bg-danger">Required</span>
+                            </div>
+                            <p class="param-desc">Unique key to identify the operation. Max 64 characters.</p>
+                        </div>
+                        <div class="param-item">
+                            <div class="param-header">
+                                <code>clientId</code>
+                                <span class="param-type">string</span>
+                                <span class="badge bg-secondary">Optional</span>
+                            </div>
+                            <p class="param-desc">Client identifier for multi-tenant scenarios. Max 64 characters.</p>
+                        </div>
+                        <div class="param-item">
+                            <div class="param-header">
+                                <code>ttlSeconds</code>
+                                <span class="param-type">long</span>
+                                <span class="badge bg-secondary">Optional</span>
+                            </div>
+                            <p class="param-desc">Custom TTL in seconds. Default: 3600. Max: 3600 (1 hour).</p>
+                        </div>
                     </div>
+                </div>
 
-                    <h4>Example Request</h4>
+                <div class="api-section">
+                    <h3>Example Request</h3>
                     <pre><code>POST /api/idempotency/check
 Content-Type: application/json
 X-API-KEY: your-api-key-here
@@ -257,36 +369,131 @@ X-API-KEY: your-api-key-here
   "idempotencyKey": "payment-123",
   "ttlSeconds": 3600
 }</code></pre>
+                </div>
 
-                    <h4>Example Response (New Key)</h4>
-                    <pre><code>{
+                <div class="api-section">
+
+
+                    <h3>Possible Responses</h3>
+                    <div class="accordion" id="responseAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#respNew">
+                                    New Key (First Request)
+                                </button>
+                            </h2>
+                            <div id="respNew" class="accordion-collapse collapse show" data-bs-parent="#responseAccordion">
+                                <div class="accordion-body">
+                                    <pre><code>{
   "idempotencyKey": "payment-123",
   "isDuplicate": false,
   "createdAt": "2026-02-07T12:00:00Z",
   "expiresAt": "2026-02-07T13:00:00Z",
   "processingTimeNanos": 12500
 }</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#respDup">
+                                    Duplicate Key (Retry)
+                                </button>
+                            </h2>
+                            <div id="respDup" class="accordion-collapse collapse" data-bs-parent="#responseAccordion">
+                                <div class="accordion-body">
+                                    <pre><code>{
+  "idempotencyKey": "payment-123",
+  "isDuplicate": true,
+  "createdAt": "2026-02-07T12:00:00Z",
+  "expiresAt": "2026-02-07T13:00:00Z",
+  "processingTimeNanos": 8200
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                    <h4>Response Codes</h4>
-                    <p><strong>200 OK</strong> All responses return 200 OK (check <code>resultStatusCode</code> in body for actual status)</p>
+                <div class="api-section">
+                    <h3>Error Responses</h3>
+                    <div class="accordion" id="errorAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#errLength">
+                                    Invalid Key Length
+                                </button>
+                            </h2>
+                            <div id="errLength" class="accordion-collapse collapse" data-bs-parent="#errorAccordion">
+                                <div class="accordion-body">
+                                    <pre><code>{
+  "resultStatusCode": 400,
+  "isDuplicate": false,
+  "error": "idempotencyKey exceeds maximum length of 64 characters"
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#errTtl">
+                                    TTL Exceeds Maximum
+                                </button>
+                            </h2>
+                            <div id="errTtl" class="accordion-collapse collapse" data-bs-parent="#errorAccordion">
+                                <div class="accordion-body">
+                                    <pre><code>{
+  "resultStatusCode": 400,
+  "isDuplicate": false,
+  "error": "ttlSeconds cannot exceed 3600 seconds (1 hour)"
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#errMissing">
+                                    Missing Key
+                                </button>
+                            </h2>
+                            <div id="errMissing" class="accordion-collapse collapse" data-bs-parent="#errorAccordion">
+                                <div class="accordion-body">
+                                    <pre><code>{
+  "resultStatusCode": 400,
+  "isDuplicate": false,
+  "error": "idempotencyKey is required and cannot be empty"
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                    <div class="info-box">
-                        <strong>Important Behavior (Zapier Compatible):</strong>
-                        <ul style="margin-top: 10px; margin-bottom: 0;">
-                            <li><strong>HTTP Status:</strong> Always <code>200 OK</code> for all responses (success, validation error, server error)</li>
-                            <li><strong>Actual Status:</strong> Check the <code>resultStatusCode</code> field in the response body:
-                                <ul>
-                                    <li><code>200</code> = Successful check (new or duplicate)</li>
-                                    <li><code>400</code> = Invalid request body or validation error</li>
-                                    <li><code>401</code> = Missing or invalid API key</li>
-                                    <li><code>500</code> = Server error occurred</li>
-                                </ul>
-                            </li>
-                            <li><strong>Check <code>isDuplicate</code> field</strong> to determine if operation should proceed</li>
-                            <li>If <code>isDuplicate</code> is <code>false</code>, proceed with your operation</li>
-                            <li>If <code>isDuplicate</code> is <code>true</code>, skip the operation (already processed)</li>
-                            <li>Expired keys are automatically replaced with new entries</li>
-                        </ul>
+                <div class="api-section">
+                    <h3>Response Behavior</h3>
+                    <p>All responses return HTTP 200 OK. Check <code>resultStatusCode</code> in body for actual status.</p>
+                    
+                    <div class="status-list">
+                        <div class="status-item">
+                            <span class="status-code success">200</span>
+                            <span class="status-desc">Successful check (new or duplicate)</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-code warning">400</span>
+                            <span class="status-desc">Invalid request or validation error</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-code danger">401</span>
+                            <span class="status-desc">Missing or invalid API key</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-code danger">500</span>
+                            <span class="status-desc">Server error</span>
+                        </div>
+                    </div>
+
+                    <div class="note-box" style="margin-top: 1.5rem;">
+                        <strong>Decision Logic:</strong> Check the <code>isDuplicate</code> field. If <code>false</code>, proceed with your operation. If <code>true</code>, skip (already processed).
                     </div>
                 </div>
             </section>
@@ -294,44 +501,54 @@ X-API-KEY: your-api-key-here
             <!-- Health API Section -->
             <section class="page" data-page="health-api">
                 <h2>Health & Monitoring</h2>
+                <p class="lead">Endpoints to verify service availability.</p>
 
-                <div class="endpoint">
-                    <h3 style="margin-top: 0;">
-                        <span class="method get">GET</span>
-                        <code>/api/idempotency/health</code>
-                    </h3>
-                    <p>Health check endpoint - requires API key</p>
-                </div>
+                <div class="endpoint-list">
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method get">GET</span>
+                            <code>/api/idempotency/health</code>
+                            <span class="badge bg-danger ms-auto">Auth Required</span>
+                        </div>
+                        <p class="endpoint-desc">Full health check with service status details.</p>
+                    </div>
 
-                <div class="endpoint">
-                    <h3 style="margin-top: 0;">
-                        <span class="method get">GET</span>
-                        <code>/ping</code>
-                    </h3>
-                    <p>Simple ping endpoint - no authentication needed</p>
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method get">GET</span>
+                            <code>/ping</code>
+                            <span class="badge bg-success ms-auto">Public</span>
+                        </div>
+                        <p class="endpoint-desc">Simple ping endpoint. Returns <code>PONG</code> if service is up.</p>
+                    </div>
                 </div>
             </section>
 
             <!-- Examples Section -->
             <section class="page" data-page="examples">
                 <h2>Code Examples</h2>
+                <p class="lead">Integration examples in popular languages.</p>
 
-                <h3>cURL</h3>
-                <div class="code-block">
-                    <button class="btn btn-sm btn-outline-primary copy-btn" title="Copy to clipboard">📋 Copy</button>
-                    <pre><code>curl -X POST http://144.24.119.46/api/idempotency/check \
+                <div class="example-list">
+                    <div class="example-item">
+                        <h3>cURL</h3>
+                        <div class="code-block">
+                            <button class="btn btn-sm btn-outline-light copy-btn" title="Copy to clipboard">Copy</button>
+                            <pre><code>curl -X POST http://144.24.119.46/api/idempotency/check \
   -H "Content-Type: application/json" \
   -H "X-API-KEY: your-api-key" \
   -d '{
     "idempotencyKey": "order-12345",
     "ttlSeconds": 3600
   }'</code></pre>
-                </div>
+                        </div>
+                    </div>
 
-                <h3>JavaScript</h3>
-                <div class="code-block">
-                    <button class="btn btn-sm btn-outline-primary copy-btn" title="Copy to clipboard">📋 Copy</button>
-                    <pre><code>fetch('http://144.24.119.46/api/idempotency/check', {
+                    <div class="example-item">
+                        <h3>JavaScript</h3>
+                        <div class="code-block">
+                            <button class="btn btn-sm btn-outline-light copy-btn" title="Copy to clipboard">Copy</button>
+                            <pre><code>fetch('http://144.24.119.46/api/idempotency/check', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -348,12 +565,14 @@ X-API-KEY: your-api-key-here
     console.log('New request - proceed');
   }
 });</code></pre>
-                </div>
+                        </div>
+                    </div>
 
-                <h3>Python</h3>
-                <div class="code-block">
-                    <button class="btn btn-sm btn-outline-primary copy-btn" title="Copy to clipboard">📋 Copy</button>
-                    <pre><code>import requests
+                    <div class="example-item">
+                        <h3>Python</h3>
+                        <div class="code-block">
+                            <button class="btn btn-sm btn-outline-light copy-btn" title="Copy to clipboard">Copy</button>
+                            <pre><code>import requests
 
 response = requests.post(
     'http://144.24.119.46/api/idempotency/check',
@@ -368,13 +587,15 @@ if response.json()['isDuplicate']:
     print('Duplicate - skip operation')
 else:
     print('New request - proceed')</code></pre>
+                        </div>
+                    </div>
                 </div>
             </section>
 
             <!-- API Tester Section -->
             <section class="page" data-page="tester">
                 <h2>Interactive API Tester</h2>
-                <p>Test the Idempotency Check API directly below:</p>
+                <p class="lead">Test the Idempotency Check API directly from this page.</p>
 
                 <div class="endpoint">
                     <form id="testerForm" class="row g-3">
@@ -391,21 +612,19 @@ else:
                             <input type="number" class="form-control" id="ttlSeconds" placeholder="3600" value="3600" min="1" max="3600">
                         </div>
                         <div class="col-md-6 d-flex align-items-end">
-                            <button type="button" class="btn btn-primary w-100" id="testBtn">🚀 Test API</button>
+                            <button type="button" class="btn btn-primary w-100" id="testBtn">Test API</button>
                         </div>
                     </form>
 
                     <div id="testerResult" style="display: none; margin-top: 20px;">
-                        <h4>Response:</h4>
+                        <h4>Response</h4>
                         <pre id="resultJson"><code>Waiting for response...</code></pre>
-                        <button class="btn btn-sm btn-outline-secondary" id="copyResultBtn">📋 Copy Response</button>
+                        <button class="btn btn-sm btn-outline-secondary" id="copyResultBtn">Copy Response</button>
                     </div>
 
                     <div id="testerError" style="display: none; margin-top: 20px;" class="alert alert-danger"></div>
                     <div id="testerLoading" style="display: none; margin-top: 20px;" class="alert alert-info">
-                        <div class="spinner-border spinner-border-sm me-2" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
                         Testing API...
                     </div>
                 </div>
@@ -414,6 +633,7 @@ else:
             <!-- FAQ Section -->
             <section class="page" data-page="faq">
                 <h2>Frequently Asked Questions</h2>
+                <p class="lead">Common questions about the Idempotency Service.</p>
 
                 <div class="accordion" id="faqAccordion">
                     <div class="accordion-item">
@@ -533,7 +753,7 @@ const key = `${userId}-${orderId}`;                 // User + order combo</code>
                 const code = codeBlock.textContent;
                 navigator.clipboard.writeText(code).then(() => {
                     const originalText = this.textContent;
-                    this.textContent = '✅ Copied!';
+                    this.textContent = 'Copied!';
                     this.classList.add('copied');
                     setTimeout(() => {
                         this.textContent = originalText;
@@ -541,9 +761,9 @@ const key = `${userId}-${orderId}`;                 // User + order combo</code>
                     }, 2000);
                 }).catch(err => {
                     console.error('Failed to copy:', err);
-                    this.textContent = '❌ Failed';
+                    this.textContent = 'Failed';
                     setTimeout(() => {
-                        this.textContent = '📋 Copy';
+                        this.textContent = 'Copy';
                     }, 2000);
                 });
             });
@@ -565,13 +785,13 @@ const key = `${userId}-${orderId}`;                 // User + order combo</code>
 
             // Validation
             if (!apiKey) {
-                errorDiv.textContent = '❌ API Key is required';
+                errorDiv.textContent = 'API Key is required';
                 errorDiv.style.display = 'block';
                 loadingDiv.style.display = 'none';
                 return;
             }
             if (!idempotencyKey) {
-                errorDiv.textContent = '❌ Idempotency Key is required';
+                errorDiv.textContent = 'Idempotency Key is required';
                 errorDiv.style.display = 'block';
                 loadingDiv.style.display = 'none';
                 return;
@@ -593,14 +813,14 @@ const key = `${userId}-${orderId}`;                 // User + order combo</code>
                 const data = await response.json();
                 
                 if (!response.ok) {
-                    errorDiv.textContent = `❌ Error: ${data.message || data.error || 'Unknown error'}`;
+                    errorDiv.textContent = `Error: ${data.message || data.error || 'Unknown error'}`;
                     errorDiv.style.display = 'block';
                 } else {
                     document.getElementById('resultJson').textContent = JSON.stringify(data, null, 2);
                     resultDiv.style.display = 'block';
                 }
             } catch (error) {
-                errorDiv.textContent = `❌ Connection Error: ${error.message}`;
+                errorDiv.textContent = `Connection Error: ${error.message}`;
                 errorDiv.style.display = 'block';
             } finally {
                 loadingDiv.style.display = 'none';
@@ -612,7 +832,7 @@ const key = `${userId}-${orderId}`;                 // User + order combo</code>
             const resultText = document.getElementById('resultJson').textContent;
             navigator.clipboard.writeText(resultText).then(() => {
                 const originalText = this.textContent;
-                this.textContent = '✅ Copied!';
+                this.textContent = 'Copied!';
                 setTimeout(() => {
                     this.textContent = originalText;
                 }, 2000);
@@ -664,12 +884,28 @@ const key = `${userId}-${orderId}`;                 // User + order combo</code>
                 }
             });
             
+            // Update URL hash
+            history.pushState(null, '', `#${pageId}`);
+            
             // Scroll to top
             window.scrollTo(0, 0);
         }
 
-        // Show overview by default
-        showPage('overview');
+        // Load page from URL hash or show overview by default
+        function loadPageFromHash() {
+            const hash = window.location.hash.substring(1);
+            if (hash && document.querySelector(`[data-page="${hash}"]`)) {
+                showPage(hash);
+            } else {
+                showPage('overview');
+            }
+        }
+
+        // Handle browser back/forward buttons
+        window.addEventListener('popstate', loadPageFromHash);
+
+        // Load initial page
+        loadPageFromHash();
 
         // Sidebar toggle for mobile
         document.getElementById('sidebarToggle').addEventListener('click', function() {
